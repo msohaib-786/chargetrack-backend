@@ -3,12 +3,11 @@ const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
 
-// Initialize Express to serve your HTML files
+// Initialize Express
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Serve all static files (index.html, login.html) in the current folder
 // Serve static assets from the current directory
 app.use(express.static(path.join(__dirname)));
 
@@ -22,6 +21,7 @@ const registeredUsers = {
     "RFID_TAG_4402": { name: "EV Driver 2", balance: 0.00 }
 };
 
+// Full 11-Station GridCars Gauteng Network
 let chargers = [
     { id: "GC-JHB-01", name: "Sandton City Hub - Bay 1", status: "Charging", currentKw: 45.2, type: "DC", firmware: "v1.4.2", ip: "192.168.1.10" },
     { id: "GC-JHB-02", name: "Sandton City Hub - Bay 2", status: "Available", currentKw: 0, type: "DC", firmware: "v1.4.2", ip: "192.168.1.11" },
@@ -76,7 +76,6 @@ setInterval(() => {
     });
 }, 3000);
 
-// Use dynamic cloud port or local 8080
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
     console.log(`[SERVER] CSMS Web and WebSocket server running on port ${PORT}`);
