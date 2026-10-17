@@ -9,7 +9,13 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // Serve all static files (index.html, login.html) in the current folder
+// Serve static assets from the current directory
 app.use(express.static(path.join(__dirname)));
+
+// Route root URL ('/') to serve the login page first
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
 
 const registeredUsers = {
     "RFID_TAG_9921": { name: "EV Driver 1", balance: 250.00 },
