@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ChargeTrack CSMS - Central Operations Platform for EV Infrastructure" />
+  <title>ChargeTrack CSMS - Central Operations Platform</title>
+  
+  <!-- External Library: Chart.js for Dynamic Load Management (DLM) Visualizer -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- =========================================================================
+       STYLESHEET (CSS)
+       Enterprise-grade structure utilizing CSS Variables, Flexbox/Grid, 
+       Responsive Media Queries, and custom UI components (Modals/Toasts).
+       ========================================================================= -->
+  <style>
+    /* --- 1. CSS Variables & Theming --- */
+    :root {
+      --bg-base: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --border-color: #374151;
+      --border-light: #4b5563;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-dark: #d1d5db;
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --sidebar-width: 280px;
+      --transition-speed: 0.2s;
+    }
+
+    /* --- 2. Global Reset & Typography --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* --- 3. Sidebar Navigation --- */
+    aside {
+      width: var(--sidebar-width);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 20;
+      transition: transform 0.3s ease;
+    }
+
+    .brand-container {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border-color);
+      background-color: rgba(17, 24, 39, 0.8);
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-green));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .brand-title { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand-badge {
+      font-size: 10px;
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      padding: 3px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      display: inline-block;
+      margin-top: 4px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    nav { flex: 1; padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+    .nav-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 16px 10px 6px 10px; }
+    .nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; color: var(--text-muted); text-decoration: none; border-radius: 8px; font-weight: 500; transition: all var(--transition-speed); cursor: pointer; }
+    .nav-item:hover { background-color: var(--bg-card); color: var(--text-main); }
+    .nav-item.active { background-color: var(--accent-primary); color: white; font-weight: 600; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); }
+    .nav-icon { font-size: 18px; opacity: 0.9; }
+
+    .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: rgba(0, 0, 0, 0.1); }
+
+    /* --- 4. Main Application Layout & Header --- */
+    .app-main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; background-color: var(--bg-base); }
+    header { background-color: var(--bg-surface); border-bottom: 1px solid var(--border-color); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    
+    .search-box { display: flex; align-items: center; background-color: var(--bg-base); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 16px; width: 420px; gap: 12px; transition: border-color var(--transition-speed); }
+    .search-box:focus-within { border-color: var(--accent-primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+    .search-box input { background: transparent; border: none; color: var(--text-main); outline: none; font-size: 14px; width: 100%; }
+    
+    .header-actions { display: flex; align-items: center; gap: 24px; }
+    .connection-pill { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 30px; transition: all var(--transition-speed); border: 1px solid transparent; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.5; } 100% { transform: scale(0.95); opacity: 1; } }
+    
+    .user-profile { display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--border-color); padding-left: 24px; cursor: pointer; }
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #4b5563, #374151); display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid var(--border-color); }
+
+    /* --- 5. SPA View Container --- */
+    .content-area { padding: 32px; max-width: 1600px; margin: 0 auto; width: 100%; }
+    .view-section { display: none; flex-direction: column; gap: 28px; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .view-section.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- 6. KPI Grid Elements --- */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+    .kpi-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform var(--transition-speed); }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+    .kpi-title { font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 32px; font-weight: 800; display: flex; align-items: baseline; gap: 8px; }
+    .kpi-sub { font-size: 13px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+
+    /* --- 7. Standard Panels & Forms --- */
+    .panel { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    .panel-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+    .panel-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .panel-subtitle { font-size: 13px; color: var(--text-muted); }
+    
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .input-field { display: flex; flex-direction: column; gap: 8px; }
+    .input-field label { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+    .custom-input, .custom-select { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 16px; border-radius: 8px; font-size: 14px; outline: none; transition: border-color var(--transition-speed); width: 100%; }
+    .custom-select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
+    .custom-input:focus, .custom-select:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    
+    .btn-primary { background-color: var(--accent-primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; transition: all var(--transition-speed); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); }
+    .btn-primary:hover { background-color: var(--accent-primary-hover); transform: translateY(-1px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all var(--transition-speed); }
+    .btn-outline:hover { background: var(--bg-card); border-color: var(--text-muted); }
+
+    /* --- 8. Specific UI Modules (Charts, Chargers, Tables) --- */
+    .chart-panel-row { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .chart-container { position: relative; height: 280px; width: 100%; padding-top: 10px; }
+    
+    .charger-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding-top: 8px; }
+    .charger-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 6px solid #64748b; transition: transform var(--transition-speed), box-shadow var(--transition-speed); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    .charger-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); }
+    .charger-card.available { border-left-color: var(--accent-green); }
+    .charger-card.charging { border-left-color: var(--accent-primary); }
+    .charger-card.faulted { border-left-color: var(--accent-red); }
+    
+    .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-badge.available { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-badge.charging { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-badge.faulted { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+    thead th { padding: 14px 16px; color: var(--text-muted); font-weight: 700; border-bottom: 2px solid var(--border-color); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; background-color: rgba(0, 0, 0, 0.1); }
+    tbody td { padding: 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    tbody tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
+    .tx-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+
+    /* --- 9. Toast Notification System --- */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+    .toast { background: var(--bg-card); border-left: 4px solid var(--accent-primary); color: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 14px; animation: slideIn 0.3s forwards; opacity: 0; transform: translateX(100%); }
+    @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+    /* --- 10. Responsive Media Queries --- */
+    @media (max-width: 1024px) {
+      .chart-panel-row { grid-template-columns: 1fr; }
+      .search-box { width: 250px; }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      aside { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 20px; height: 70px; border-right: none; border-bottom: 1px solid var(--border-color); }
+      .sidebar-footer, nav { display: none; } /* Simplified mobile view */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================================
+       SIDEBAR NAVIGATION (SPA ROUTING)
+       ========================================================================= -->
+  <aside>
+    <div class="brand-container">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <div class="brand-title">ChargeTrack</div>
+        <span class="brand-badge">CSMS v2.4 (Prod)</span>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-label">Core Operations</div>
+      <a class="nav-item active" data-target="view-dashboard">
+        <span class="nav-icon">📊</span> Live Operations Map
+      </a>
+      <a class="nav-item" data-target="view-stations">
+        <span class="nav-icon">🔌</span> Station Management
+      </a>
+      
+      <div class="nav-label">Roaming & Billing</div>
+      <a class="nav-item" data-target="view-tariffs">
+        <span class="nav-icon">🏷️</span> Tariff Engine
+      </a>
+      <a class="nav-item" data-target="view-analytics">
+        <span class="nav-icon">📑</span> Expense Analytics (CDR)
+      </a>
+
+      <div class="nav-label">System Control</div>
+      <a class="nav-item" data-target="view-settings">
+        <span class="nav-icon">⚙️</span> System Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>🌍 <strong>Region:</strong> AWS af-south-1</div>
+      <div style="padding-left: 22px;">Cape Town Cloud Zone</div>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       MAIN APPLICATION LAYOUT
+       ========================================================================= -->
+  <div class="app-main">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="search-box">
+        <span style="opacity: 0.7;">🔍</span>
+        <input type="text" placeholder="Search EVSE ID, Station Location, or Driver RFID..." />
+      </div>
+
+      <div class="header-actions">
+        <!-- WebSocket Connection Status -->
+        <div class="connection-pill" id="ws-status-pill">
+          <div class="pulse-dot" id="ws-dot"></div>
+          <span id="ws-status-text">CSMS Initializing...</span>
+        </div>
+
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600;">Site Administrator</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Operator Level 3</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- =====================================================================
+           VIEW 1: LIVE OPERATIONS DASHBOARD
+           Handles DLM Graphing, Active Telemetry, and Estimator
+           ===================================================================== -->
+      <div id="view-dashboard" class="view-section active">
+        
+        <!-- KPI Row -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-title">Active GridCars Stations</div>
+            <div class="kpi-value" id="kpi-active-chargers">0 <span style="font-size: 16px; color: var(--text-muted);">/ 0</span></div>
+            <div class="kpi-sub" style="color: var(--accent-green);"><span>●</span> 100% Hardware Online</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Live Grid Demand</div>
+            <div class="kpi-value" id="kpi-total-kw">0.0 <span style="font-size: 16px; color: var(--text-muted);">kW</span></div>
+            <div class="kpi-sub" style="color: #60a5fa;"><span>📈</span> Site DLM Ceiling: 250.0 kW</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Energy Delivered Today</div>
+            <div class="kpi-value">642.8 <span style="font-size: 16px; color: var(--text-muted);">kWh</span></div>
+            <div class="kpi-sub" style="color: var(--accent-green);"><span>↑</span> +12.4% vs Yesterday</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Daily Revenue (ZAR)</div>
+            <div class="kpi-value">R 4,821.00</div>
+            <div class="kpi-sub" style="color: var(--accent-amber);"><span>🏷️</span> Avg Tariff: R7.50 / kWh</div>
+          </div>
+        </div>
+
+        <!-- Charts & Estimator Row -->
+        <div class="chart-panel-row">
+          
+          <!-- DLM Chart -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Gauteng Grid Load Management (DLM)</h2>
+                <span class="panel-subtitle">Real-Time Power Draw across all Active GridCars Locations vs Eskom Limits</span>
+              </div>
+            </div>
+            <div class="chart-container"><canvas id="dlmChart"></canvas></div>
+          </div>
+
+          <!-- Trip Range Estimator -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Trip Range Estimator</h2>
+              <span style="font-size: 22px;">🚗</span>
+            </div>
+            <div class="estimator-form">
+              <div class="input-field">
+                <label>Vehicle Model Data</label>
+                <select id="vehicle-select" class="custom-select">
+                  <option value="31" data-range="230">BYD Dolphin Surf (31 kWh - 230km Max)</option>
+                  <option value="38" data-range="305">BYD New Seagull (38 kWh - 305km Max)</option>
+                  <option value="75" data-range="450">Generic EV (75 kWh - 450km Max)</option>
+                </select>
+              </div>
+              <div class="input-field">
+                <label>Current Battery Level (SOC %)</label>
+                <input type="number" id="battery-soc" class="custom-input" value="100" min="1" max="100" />
+              </div>
+              <div class="input-field">
+                <label>Target GridCars Destination</label>
+                <select id="dest-select" class="custom-select">
+                  <option value="15">Springs Mall AC (15 km away)</option>
+                  <option value="52">Sandton City Hub (52 km away)</option>
+                  <option value="85">Menlyn Mall Pretoria (85 km away)</option>
+                  <option value="120">OR Tambo Supercharger (120 km away)</option>
+                </select>
+              </div>
+              <button class="btn-primary" onclick="calculateTripRange()">Verify Battery Reachability</button>
+              
+              <div class="panel" style="padding: 16px; flex-direction: row; justify-content: space-between; margin-top: 4px;" id="calc-result">
+                <span>Estimated Range: <strong>230 km</strong></span>
+                <span style="color: #34d399; font-weight: 700;">Safe Trip ✅</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Hardware Fleet Grid -->
+        <div class="panel">
+          <div class="panel-header" style="align-items: center;">
+            <div>
+              <h2 class="panel-title">Gauteng GridCars Infrastructure Status</h2>
+              <span class="panel-subtitle">Direct telemetry streamed over secure OCPP 2.0.1 WebSockets</span>
+            </div>
+            <select id="type-filter" class="custom-select" style="width: 240px; font-weight: 600;">
+              <option value="ALL">Filter: All Available Hardware</option>
+              <option value="DC">Level 3: DC Fast Chargers Only</option>
+              <option value="AC">Level 2: AC Destination Only</option>
+            </select>
+          </div>
+          <div class="charger-cards-grid" id="charger-cards">
+            <!-- Hardware UI injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 2: STATION MANAGEMENT
+           Hardware configuration, diagnostics, and reboot controls
+           ===================================================================== -->
+      <div id="view-stations" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Station Management Fleet Configuration</h2>
+              <span class="panel-subtitle">Provision new EVSE hardware, manage diagnostics, and execute remote resets.</span>
+            </div>
+            <button class="btn-primary" onclick="showToast('Configuration portal initializing...', 'info')">➕ Provision New EVSE</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>EVSE ID</th>
+                  <th>Physical Location</th>
+                  <th>Hardware Model</th>
+                  <th>Firmware</th>
+                  <th>IP Address</th>
+                  <th>Current Status</th>
+                  <th>Diagnostics</th>
+                </tr>
+              </thead>
+              <tbody id="station-management-table">
+                <!-- Populated via JS based on the GridCars array -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 3: TARIFF ENGINE
+           Manage Time-Of-Use pricing logic and grid penalties
+           ===================================================================== -->
+      <div id="view-tariffs" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Tariff Configuration Engine</h2>
+              <span class="panel-subtitle">Set Time-of-Use (TOU) pricing algorithms based on Eskom grid stages.</span>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="input-field">
+              <label>Base AC Destination Rate (ZAR/kWh)</label>
+              <input type="number" class="custom-input" value="5.85" id="tariff-ac" />
+            </div>
+            <div class="input-field">
+              <label>Base DC Fast Charging Rate (ZAR/kWh)</label>
+              <input type="number" class="custom-input" value="7.35" id="tariff-dc" />
+            </div>
+            <div class="input-field">
+              <label>Eskom Peak Hour Multiplier (17:00 - 20:00)</label>
+              <input type="number" class="custom-input" value="1.50" />
+            </div>
+            <div class="input-field">
+              <label>Idle Block Fee (ZAR/minute after 15m grace)</label>
+              <input type="number" class="custom-input" value="2.00" />
+            </div>
+          </div>
+          <div style="border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 12px;">
+            <button class="btn-primary" onclick="simulateTariffUpdate()">Deploy Updated Network Tariffs</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 4: EXPENSE ANALYTICS & CDRs
+           Financial auditing, Tax/POPIA compliance, and exports
+           ===================================================================== -->
+      <div id="view-analytics" class="view-section">
+        <div class="panel">
+          <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
+            <div>
+              <h2 class="panel-title">Charging Session Logger & Expense Analytics</h2>
+              <span class="panel-subtitle">Verified Charge Detail Records (CDRs) archived for POPIA & Tax Compliance</span>
+            </div>
+            <div style="display: flex; gap: 12px;">
+              <button class="btn-outline" onclick="showToast('Exporting CDRs to CSV format. Check downloads.', 'success')">📥 Export CSV</button>
+              <button class="btn-outline" onclick="showToast('Generating official tax compliance PDF...', 'info')">📄 Generate PDF</button>
+            </div>
+          </div>
+          <div style="overflow-x: auto; margin-top: 20px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Station Config</th>
+                  <th>Driver RFID Hash</th>
+                  <th>Energy</th>
+                  <th>Duration</th>
+                  <th>Total Cost (ZAR)</th>
+                  <th>Settlement Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-family: monospace; font-weight: 700; color: #93c5fd;">#CDR-2026-9081</td>
+                  <td><strong>Sandton City Hub</strong><br><span style="font-size: 12px; color: var(--text-muted);">DC CCS2 Fast</span></td>
+                  <td>TAG_***9921</td>
+                  <td><strong>28.4 kWh</strong></td>
+                  <td>34 mins</td>
+                  <td style="font-weight: 800; font-size: 15px;">R 213.00</td>
+                  <td><span style="background: rgba(59,130,246,0.15); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Charging Live</span></td>
+                </tr>
+                <tr>
+                  <td style="font-family: monospace; font-weight: 700; color: #93c5fd;">#CDR-2026-9080</td>
+                  <td><strong>OR Tambo Int. Airport</strong><br><span style="font-size: 12px; color: var(--text-muted);">DC CCS2 Fast</span></td>
+                  <td>TAG_***4402</td>
+                  <td><strong>42.1 kWh</strong></td>
+                  <td>48 mins</td>
+                  <td style="font-weight: 800; font-size: 15px;">R 315.75</td>
+                  <td><span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Settled (POPIA)</span></td>
+                </tr>
+                <tr>
+                  <td style="font-family: monospace; font-weight: 700; color: #93c5fd;">#CDR-2026-9079</td>
+                  <td><strong>Springs Mall AC</strong><br><span style="font-size: 12px; color: var(--text-muted);">Type 2 Cable</span></td>
+                  <td>TAG_***8819</td>
+                  <td><strong>14.8 kWh</strong></td>
+                  <td>2h 22m</td>
+                  <td style="font-weight: 800; font-size: 15px;">R 111.00</td>
+                  <td><span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Settled (POPIA)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 5: SYSTEM SETTINGS
+           ===================================================================== -->
+      <div id="view-settings" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div><h2 class="panel-title">Core System Configuration</h2><span class="panel-subtitle">Global CSMS parameters and AWS integration rules</span></div>
+          </div>
+          <div class="form-grid">
+            <div class="input-field"><label>AWS Hosting Region (Immutable)</label><input type="text" class="custom-input" value="af-south-1 (Cape Town)" disabled style="opacity: 0.6; cursor: not-allowed;" /></div>
+            <div class="input-field"><label>Max Global Grid Capacity Limit (kW)</label><input type="number" class="custom-input" value="250" /></div>
+            <div class="input-field"><label>OCPP Heartbeat Interval (Seconds)</label><input type="number" class="custom-input" value="60" /></div>
+            <div class="input-field"><label>Admin Dashboard Refresh Rate (ms)</label><input type="number" class="custom-input" value="3000" /></div>
+          </div>
+          <div style="border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 12px;">
+            <button class="btn-primary" onclick="showToast('Global settings synchronized with AWS database.', 'success')">Save Configuration</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- =========================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       Handles SPA Routing, WebSockets, Chart.js, Mock Data, and Modals
+       ========================================================================= -->
+  <script>
+    /**
+     * 1. SPA ROUTER LOGIC
+     * Dynamically switches between dashboard views without reloading the page.
+     */
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        // Reset active sidebar styling
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        
+        // Hide all views and reveal the target
+        const targetId = e.currentTarget.getAttribute('data-target');
+        document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+        document.getElementById(targetId).classList.add('active');
+        
+        // Optional: Trigger specific reflows if returning to the chart view
+        if(targetId === 'view-dashboard') dlmChart.update();
+      });
+    });
+
+    /**
+     * 2. CUSTOM TOAST NOTIFICATION SYSTEM
+     * Used to simulate backend responses for the frontend UI buttons.
+     * @param {string} message - The text to display
+     * @param {string} type - 'success', 'error', or 'info'
+     */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      let icon = 'ℹ️'; let borderCol = 'var(--accent-primary)';
+      if(type === 'success') { icon = '✅'; borderCol = 'var(--accent-green)'; }
+      if(type === 'error') { icon = '⚠️'; borderCol = 'var(--accent-red)'; }
+      
+      toast.style.borderLeftColor = borderCol;
+      toast.innerHTML = `<span style="font-size:18px;">${icon}</span> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      // Auto-remove after 3.5 seconds
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    /**
+     * 3. INITIALIZE DLM CHART (Chart.js)
+     */
+    const chartCtx = document.getElementById('dlmChart').getContext('2d');
+    const dlmChart = new Chart(chartCtx, {
+      type: 'line',
+      data: {
+        labels: ['0s','3s','6s','9s','12s','15s','18s'],
+        datasets: [
+          { 
+            label: 'Grid Threshold (250kW Limit)', 
+            data: [250,250,250,250,250,250,250], 
+            borderColor: '#ef4444', borderWidth: 2, borderDash: [6,6], fill: false, pointRadius: 0 
+          },
+          { 
+            label: 'Aggregated Live Network Draw (kW)', 
+            data: [120,125,122,130,128,135,133], 
+            borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderWidth: 2.5, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#60a5fa' 
+          }
+        ]
+      },
+      options: { 
+        responsive: true, maintainAspectRatio: false, 
+        plugins: { legend: { labels: { color: '#9ca3af', font: {size: 12} } } }, 
+        scales: { 
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }, 
+          y: { min: 0, max: 300, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', callback: val => val + ' kW' } } 
+        } 
+      }
+    });
+
+    /**
+     * 4. EXTENDED MOCK DATA & WEBSOCKET ENGINE
+     * Includes full 11-station GridCars array for robust frontend demonstration.
+     */
+    let latestChargerData = [];
+    const extendedGridCarsData = [
+      { id: "GC-JHB-01", name: "Sandton City Hub - Bay 1", status: "Charging", currentKw: 45.2, type: "DC", firmware: "v1.4.2", ip: "192.168.1.10" },
+      { id: "GC-JHB-02", name: "Sandton City Hub - Bay 2", status: "Available", currentKw: 0, type: "DC", firmware: "v1.4.2", ip: "192.168.1.11" },
+      { id: "GC-PTA-01", name: "Menlyn Mall Pretoria", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.55" },
+      { id: "GC-MID-01", name: "Mall of Africa Waterfall", status: "Charging", currentKw: 38.5, type: "DC", firmware: "v1.9.8", ip: "172.16.0.4" },
+      { id: "GC-JHB-03", name: "Melrose Arch - Bay 1", status: "Charging", currentKw: 11.0, type: "AC", firmware: "v3.1.0", ip: "192.168.2.22" },
+      { id: "GC-JHB-04", name: "Melrose Arch - Bay 2", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.0", ip: "192.168.2.23" },
+      { id: "GC-EKU-01", name: "OR Tambo Int. Airport", status: "Charging", currentKw: 52.4, type: "DC", firmware: "v2.1.5", ip: "10.1.1.100" },
+      { id: "GC-EKU-02", name: "East Rand Mall Boksburg", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.15" },
+      { id: "GC-EKU-03", name: "Springs Mall AC", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.16" },
+      { id: "GC-JHB-05", name: "Fourways Mall", status: "Charging", currentKw: 7.2, type: "AC", firmware: "v2.0.0", ip: "172.16.1.50" },
+      { id: "GC-PTA-02", name: "Irene Link Centurion", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.88" }
+    ];
+
+    const connectWebSocket = () => {
+      try {
+        // Automatically use secure WSS in the cloud, or normal WS on localhost
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(protocol + window.location.host);
+        
+        socket.onopen = () => {
+          document.getElementById('ws-status-text').innerText = 'CSMS Online (ws://localhost:8080)';
+          const pill = document.getElementById('ws-status-pill');
+          pill.style.background = 'rgba(16,185,129,0.15)'; pill.style.color = '#34d399'; pill.style.borderColor = 'rgba(16,185,129,0.4)';
+          document.getElementById('ws-dot').style.background = '#34d399';
+        };
+
+        socket.onmessage = (e) => {
+          const payload = JSON.parse(e.data);
+          if (payload.data) { latestChargerData = payload.data; executeRenderCycle(); }
+        };
+
+        socket.onerror = () => enableOfflineMock();
+        socket.onclose = () => enableOfflineMock();
+      } catch { enableOfflineMock(); }
+    };
+
+    function enableOfflineMock() {
+      document.getElementById('ws-status-text').innerText = 'Offline: Local Mock Data Mode';
+      const pill = document.getElementById('ws-status-pill');
+      pill.style.background = 'rgba(239,68,68,0.15)'; pill.style.color = '#f87171'; pill.style.borderColor = 'rgba(239,68,68,0.4)';
+      document.getElementById('ws-dot').style.background = '#f87171';
+      
+      if(latestChargerData.length === 0) { 
+        latestChargerData = extendedGridCarsData; 
+        executeRenderCycle(); 
+      }
+    }
+
+    // Bind event listener to the hardware filter dropdown
+    document.getElementById('type-filter').addEventListener('change', executeRenderCycle);
+
+    /**
+     * 5. CORE RENDER ENGINE
+     * Updates KPIs, refreshes the chart, builds the Dashboard Grid, 
+     * and populates the Station Management Table.
+     */
+    function executeRenderCycle() {
+      if (!latestChargerData.length) return;
+
+      // 5.1 Calculate KPIs (Always full dataset)
+      let totalKw = 0, activeCount = 0;
+      latestChargerData.forEach(c => { 
+        totalKw += Number(c.currentKw || 0); 
+        if (c.status === 'Charging') activeCount++; 
+      });
+      
+      document.getElementById('kpi-total-kw').innerHTML = `${totalKw.toFixed(1)} <span style="font-size: 16px; color: var(--text-muted);">kW</span>`;
+      document.getElementById('kpi-active-chargers').innerHTML = `${activeCount} <span style="font-size: 16px; color: var(--text-muted);">/ ${latestChargerData.length}</span>`;
+
+      // 5.2 Update DLM Chart
+      const timeStr = new Date().toLocaleTimeString('en-US', {hour12: false});
+      if (dlmChart.data.labels.length > 7) { 
+        dlmChart.data.labels.shift(); 
+        dlmChart.data.datasets[1].data.shift(); 
+      }
+      dlmChart.data.labels.push(timeStr); 
+      dlmChart.data.datasets[1].data.push(totalKw); 
+      dlmChart.update();
+
+      // 5.3 Filter Hardware for the Dashboard Grid
+      const currentFilter = document.getElementById('type-filter').value;
+      const filteredData = latestChargerData.filter(c => currentFilter === 'ALL' || c.type === currentFilter);
+
+      document.getElementById('charger-cards').innerHTML = filteredData.map(c => {
+        const isCharging = c.status === 'Charging';
+        const plugIcon = c.type === 'DC' ? '⚡ CCS2 Fast' : '🔌 Type 2 AC';
+        return `
+          <div class="charger-card ${isCharging ? 'charging' : 'available'}">
+            <div class="charger-card-top">
+              <div>
+                <div class="charger-name">${c.name} <span class="type-badge">${c.type}</span></div>
+                <div class="charger-id">OCPP ID: ${c.id}</div>
+              </div>
+              <span class="status-badge ${isCharging ? 'charging' : 'available'}">${c.status}</span>
+            </div>
+            <div class="charger-metrics">
+              <div class="metric-group"><span>Live Power Output</span><strong>${c.currentKw.toFixed(1)} kW</strong></div>
+              <div class="metric-group" style="text-align:right;"><span>Connector</span><strong style="font-size:14px;">${plugIcon}</strong></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 5.4 Populate the Station Management Table in View 2
+      document.getElementById('station-management-table').innerHTML = latestChargerData.map(c => {
+        const statCol = c.status === 'Charging' ? '#60a5fa' : '#34d399';
+        const statBg = c.status === 'Charging' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)';
+        return `
+          <tr>
+            <td style="font-family:monospace; font-weight:700;">${c.id}</td>
+            <td style="font-weight:600;">${c.name}</td>
+            <td>Hardware Array ${c.type}</td>
+            <td style="color:var(--text-muted);">${c.firmware}</td>
+            <td style="font-family:monospace; color:var(--text-muted);">${c.ip}</td>
+            <td><span style="padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase; color:${statCol}; background:${statBg}; border:1px solid ${statCol}50;">${c.status}</span></td>
+            <td><button class="btn-outline" onclick="triggerRemoteReboot('${c.id}')" style="padding:6px 12px;">Remote Reboot</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 6. INTERACTIVE LOGIC MODULES
+     */
+
+    // Simulated OCPP Reboot Command
+    function triggerRemoteReboot(evseId) {
+      showToast(`Sending OCPP Reset.Req command to ${evseId}...`, 'info');
+      setTimeout(() => {
+        showToast(`Hardware ${evseId} successfully rebooted.`, 'success');
+      }, 2000);
+    }
+
+    // Tariff Simulator
+    function simulateTariffUpdate() {
+      const ac = document.getElementById('tariff-ac').value;
+      const dc = document.getElementById('tariff-dc').value;
+      showToast(`Synchronizing new base tariffs (AC: R${ac}, DC: R${dc}) across the network...`, 'info');
+      setTimeout(() => {
+        showToast(`Tariffs successfully deployed to all active EVSEs.`, 'success');
+      }, 1500);
+    }
+
+    // Trip Range Estimator (Utilizing BYD Dolphin Surf precise specs)
+    function calculateTripRange() {
+      const vSelect = document.getElementById('vehicle-select');
+      const exactMaxRangeKm = parseFloat(vSelect.options[vSelect.selectedIndex].getAttribute('data-range'));
+      const batterySoc = parseFloat(document.getElementById('battery-soc').value);
+      const tripDist = parseFloat(document.getElementById('dest-select').value);
+      
+      const estRange = Math.round(exactMaxRangeKm * (batterySoc / 100));
+      const resultUI = document.getElementById('calc-result');
+      
+      if (estRange >= tripDist + 15) {
+        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color:#34d399; font-weight:700; background:rgba(16,185,129,0.15); padding:4px 10px; border-radius:4px;">Safe Trip ✅</span>`;
+        resultUI.style.borderColor = 'rgba(16,185,129,0.4)';
+      } else {
+        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color:#f87171; font-weight:700; background:rgba(239,68,68,0.15); padding:4px 10px; border-radius:4px;">Warning: Low Range ⚠️</span>`;
+        resultUI.style.borderColor = 'rgba(239,68,68,0.4)';
+      }
+    }
+
+    // Execute Startup
+    connectWebSocket();
+
+  </script>
+</body>
+</html>

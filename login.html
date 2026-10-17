@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ChargeTrack CSMS - Secure Authentication Portal" />
+  <title>ChargeTrack CSMS - System Login</title>
+
+  <style>
+    /* --- CSS Variables & Theming (Matches the Main Dashboard) --- */
+    :root {
+      --bg-base: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --border-color: #374151;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --transition-speed: 0.2s;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      /* Adds a subtle radial gradient behind the login box */
+      background: radial-gradient(circle at center, #111827 0%, #0a0f1d 100%);
+    }
+
+    /* --- Auth Container & Branding --- */
+    .auth-container {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .brand-logo {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-green));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 28px;
+      color: white;
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+      margin-bottom: 16px;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* --- Forms & Inputs --- */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #d1d5db;
+    }
+
+    .custom-input {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all var(--transition-speed);
+      width: 100%;
+    }
+
+    .custom-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .custom-input::placeholder {
+      color: #6b7280;
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color var(--transition-speed);
+    }
+
+    .forgot-link:hover {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    /* --- Buttons & Spinners --- */
+    .btn-submit {
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-speed);
+      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--accent-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      background-color: var(--border-color);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Footer Status --- */
+    .system-status {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    /* --- Toast Notifications --- */
+    #toast-container { position: fixed; top: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+    .toast { background: var(--bg-card); border-left: 4px solid var(--accent-red); color: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 14px; animation: slideInRight 0.3s forwards; opacity: 0; transform: translateX(100%); }
+    @keyframes slideInRight { to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="brand-header">
+      <div class="brand-logo">⚡</div>
+      <h1 class="brand-title">ChargeTrack CSMS</h1>
+      <span class="brand-subtitle">Operator Authentication Portal</span>
+    </div>
+
+    <form id="loginForm" class="auth-form">
+      <div class="input-group">
+        <label for="email">Administrator Email</label>
+        <input type="email" id="email" class="custom-input" placeholder="admin@chargetrack.co.za" required autocomplete="email" />
+      </div>
+
+      <div class="input-group">
+        <label for="password">Secure Password</label>
+        <input type="password" id="password" class="custom-input" placeholder="••••••••••••" required autocomplete="current-password" />
+      </div>
+
+      <div class="form-options">
+        <label class="checkbox-group">
+          <input type="checkbox" id="remember" />
+          <span>Remember device</span>
+        </label>
+        <a href="#" class="forgot-link" onclick="triggerForgotPass()">Forgot Password?</a>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-submit">
+        <span id="btnText">Authenticate Request</span>
+        <div class="spinner" id="btnSpinner"></div>
+      </button>
+    </form>
+  </div>
+
+  <div class="system-status">
+    <div class="status-dot"></div>
+    CSMS API & WebSockets Online (af-south-1)
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- =========================================================================
+       JAVASCRIPT AUTHENTICATION LOGIC
+       ========================================================================= -->
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    /**
+     * Intercept the form submission to simulate a secure API login request
+     */
+    loginForm.addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent page reload
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // 1. Trigger loading UI state
+      submitBtn.disabled = true;
+      btnText.innerText = "Verifying Credentials...";
+      btnSpinner.style.display = "block";
+
+      // 2. Simulate network latency and backend verification (1.5 seconds)
+      setTimeout(() => {
+        // Mock Validation Logic
+        if (email === "admin@chargetrack.co.za" && password === "admin123") {
+          // Success: Redirect to the main dashboard
+          btnText.innerText = "Access Granted";
+          btnSpinner.style.display = "none";
+          submitBtn.style.backgroundColor = "var(--accent-green)";
+          
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 500);
+
+        } else {
+          // Failure: Show error toast and reset UI
+          showErrorToast("Invalid credentials. Unauthorized access blocked.");
+          
+          submitBtn.disabled = false;
+          btnText.innerText = "Authenticate Request";
+          btnSpinner.style.display = "none";
+          document.getElementById('password').value = ""; // Clear password field
+        }
+      }, 1500);
+    });
+
+    /**
+     * Custom Error Toast Notification System
+     * @param {string} message - The error message to display
+     */
+    function showErrorToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span style="font-size:18px;">⚠️</span> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      // Auto-remove after 4 seconds
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-10px)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function triggerForgotPass() {
+      showErrorToast("Password reset link sent to registered operator email.");
+    }
+  </script>
+</body>
+</html>
