@@ -1228,6 +1228,22 @@
       document.body.classList.add('light-theme');
       const btn = document.getElementById('themeToggleBtn');
       if (btn) btn.innerText = '🌙';
+    }function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeToggleBtn');
+      
+      // If currently Light Mode, force switch to Dark Mode
+      if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        if (btn) btn.innerText = '☀️';
+        localStorage.setItem('chargetrack_theme', 'dark');
+      } 
+      // If currently Dark Mode, force switch to Light Mode
+      else {
+        body.classList.add('light-theme');
+        if (btn) btn.innerText = '🌙';
+        localStorage.setItem('chargetrack_theme', 'light');
+      }
     }
   </script>
 </body>
