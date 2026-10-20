@@ -1191,10 +1191,12 @@
 
     connectWebSocket();
   </script>
-  function toggleTheme() {
+<script>
+    function toggleTheme() {
       document.body.classList.toggle('light-theme');
       const isLight = document.body.classList.contains('light-theme');
-      document.getElementById('themeToggleBtn').innerText = isLight ? '🌙' : '☀️';
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.innerText = isLight ? '🌙' : '☀️';
       localStorage.setItem('chargetrack_theme', isLight ? 'light' : 'dark');
     }
 
@@ -1204,5 +1206,8 @@
       const btn = document.getElementById('themeToggleBtn');
       if (btn) btn.innerText = '🌙';
     }
+  </script>
+</body>
+</html>
 </body>
 </html>
