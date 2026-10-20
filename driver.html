@@ -6,13 +6,9 @@
   <meta name="description" content="ChargeTrack EV Driver Mobile Application - Live OCPP Charging & Wallet Portal" />
   <title>ChargeTrack Driver App - Mobile EV Charging</title>
 
-  <!-- =========================================================================
-       STYLESHEET (CSS)
-       Matches the exact Phase 4 Mobile Wireframe UI with responsive desktop 
-       phone-frame preview, interactive map pins, bottom sheet, and live meter.
-       ========================================================================= -->
   <style>
     :root {
+      /* Dark Theme Defaults */
       --app-bg: #f8fafc;
       --card-bg: #ffffff;
       --text-primary: #0f172a;
@@ -32,6 +28,28 @@
       --shadow-floating: 0 8px 20px rgba(15, 23, 42, 0.08);
     }
 
+    /* --- LIGHT THEME OVERRIDES --- */
+    body.light-driver {
+      --app-bg: #e2e8f0;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-soft: #cbd5e1;
+    }
+
+    /* Adjust the live charging overlay for daytime mode */
+    body.light-driver .charging-live-overlay {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #0f172a;
+    }
+    body.light-driver .telemetry-box {
+      background: rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    body.light-driver .telemetry-box span { color: #64748b; }
+    body.light-driver .telemetry-box strong { color: #0f172a; }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -50,7 +68,6 @@
       padding: 20px;
     }
 
-    /* --- Desktop Presentation Switcher Bar --- */
     .demo-toolbar {
       display: flex;
       align-items: center;
@@ -76,13 +93,8 @@
       border: 1px solid rgba(59, 130, 246, 0.3);
       transition: 0.2s;
     }
+    .demo-toolbar a:hover { background: #2563eb; color: #ffffff; }
 
-    .demo-toolbar a:hover {
-      background: #2563eb;
-      color: #ffffff;
-    }
-
-    /* --- Mobile Phone Frame Container --- */
     .phone-frame {
       width: 100%;
       max-width: 430px;
@@ -95,27 +107,15 @@
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      transition: background-color 0.3s;
     }
 
     @media (max-width: 480px) {
-      body {
-        padding: 0;
-        background-color: var(--app-bg);
-      }
-      .demo-toolbar {
-        border-radius: 0;
-        margin-bottom: 0;
-        max-width: 100%;
-      }
-      .phone-frame {
-        max-width: 100%;
-        height: calc(100vh - 45px);
-        border: none;
-        border-radius: 0;
-      }
+      body { padding: 0; background-color: var(--app-bg); }
+      .demo-toolbar { display: none; }
+      .phone-frame { max-width: 100%; height: 100vh; border: none; border-radius: 0; }
     }
 
-    /* --- 1. Top iOS Status Bar --- */
     .ios-status-bar {
       background-color: var(--card-bg);
       padding: 14px 24px 8px 24px;
@@ -128,14 +128,8 @@
       z-index: 20;
     }
 
-    .status-icons {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-    }
+    .status-icons { display: flex; align-items: center; gap: 6px; font-size: 13px; }
 
-    /* --- 2. Top Search & Wallet Header (From Phase 4 Image) --- */
     .top-header-card {
       background-color: var(--card-bg);
       padding: 8px 18px 16px 18px;
@@ -148,723 +142,158 @@
       gap: 12px;
     }
 
-    .search-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
+    .search-row { display: flex; gap: 10px; align-items: center; }
     .search-input-wrap {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      background-color: #ffffff;
-      border: 1.5px solid var(--border-soft);
-      border-radius: 14px;
-      padding: 11px 14px;
-      gap: 10px;
-      transition: border-color 0.2s;
+      flex: 1; display: flex; align-items: center; background-color: #ffffff;
+      border: 1.5px solid var(--border-soft); border-radius: 14px; padding: 11px 14px; gap: 10px;
     }
-
-    .search-input-wrap:focus-within {
-      border-color: var(--blue-primary);
-    }
-
-    .search-input-wrap input {
-      border: none;
-      outline: none;
-      width: 100%;
-      font-size: 14px;
-      color: var(--text-primary);
-    }
-
-    .search-input-wrap input::placeholder {
-      color: var(--text-muted);
-    }
+    .search-input-wrap:focus-within { border-color: var(--blue-primary); }
+    .search-input-wrap input { border: none; outline: none; width: 100%; font-size: 14px; color: var(--text-primary); background: transparent; }
+    .search-input-wrap input::placeholder { color: var(--text-muted); }
 
     .filter-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      border: 1.5px solid var(--border-soft);
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 16px;
-      color: var(--text-primary);
-      font-weight: 700;
-      transition: 0.2s;
+      width: 44px; height: 44px; border-radius: 14px; border: 1.5px solid var(--border-soft); background: #ffffff;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: 0.2s;
     }
+    .filter-btn.active-filter { border-color: var(--blue-primary); background-color: var(--blue-light); }
 
-    .filter-btn.active-filter {
-      border-color: var(--blue-primary);
-      background-color: var(--blue-light);
-      color: var(--blue-primary);
-    }
+    .wallet-bar { display: flex; align-items: center; justify-content: space-between; background-color: var(--blue-light); padding: 10px 16px; border-radius: 14px; }
+    .wallet-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #0f172a; }
+    .wallet-amount { color: var(--blue-primary); font-weight: 800; font-size: 16px; margin-left: 4px; }
+    .topup-btn { background: none; border: none; color: var(--blue-primary); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .topup-btn:hover { text-decoration: underline; }
 
-    .wallet-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--blue-light);
-      padding: 10px 16px;
-      border-radius: 14px;
-    }
+    .mobile-tab-view { display: none; flex: 1; flex-direction: column; position: relative; overflow-y: auto; }
+    .mobile-tab-view.active { display: flex; }
 
-    .wallet-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
+    .map-canvas { flex: 1; position: relative; background-color: #eef2f6; overflow: hidden; min-height: 290px; }
+    .map-block { position: absolute; background-color: #e2e8f0; border-radius: 12px; }
+    .map-park { position: absolute; background-color: #dcfce7; border-radius: 14px; opacity: 0.7; }
+    .map-highway { position: absolute; background-color: #ffffff; height: 12px; width: 120%; top: 38%; left: -10%; transform: rotate(-8deg); }
+    .map-road-v1 { position: absolute; background-color: #ffffff; width: 14px; height: 100%; left: 42%; top: 0; }
+    .map-road-v2 { position: absolute; background-color: #ffffff; width: 12px; height: 100%; left: 78%; top: 0; }
+    .map-road-h1 { position: absolute; background-color: #ffffff; height: 12px; width: 100%; top: 62%; left: 0; }
 
-    .wallet-amount {
-      color: var(--blue-primary);
-      font-weight: 800;
-      font-size: 16px;
-      margin-left: 4px;
-    }
-
-    .topup-btn {
-      background: none;
-      border: none;
-      color: var(--blue-primary);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .topup-btn:hover {
-      text-decoration: underline;
-    }
-
-    /* --- 3. Tab Views Container --- */
-    .mobile-tab-view {
-      display: none;
-      flex: 1;
-      flex-direction: column;
-      position: relative;
-      overflow-y: auto;
-    }
-
-    .mobile-tab-view.active {
-      display: flex;
-    }
-
-    /* --- 4. Interactive Map Canvas (Matching Phase 4 Wireframe) --- */
-    .map-canvas {
-      flex: 1;
-      position: relative;
-      background-color: #eef2f6;
-      overflow: hidden;
-      min-height: 290px;
-    }
-
-    /* Simulated Map Grid Blocks & Roads */
-    .map-block {
-      position: absolute;
-      background-color: #e2e8f0;
-      border-radius: 12px;
-    }
-
-    .map-park {
-      position: absolute;
-      background-color: #dcfce7;
-      border-radius: 14px;
-      opacity: 0.7;
-    }
-
-    .map-highway {
-      position: absolute;
-      background-color: #ffffff;
-      height: 12px;
-      width: 120%;
-      top: 38%;
-      left: -10%;
-      transform: rotate(-8deg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    }
-
-    .map-road-v1 {
-      position: absolute;
-      background-color: #ffffff;
-      width: 14px;
-      height: 100%;
-      left: 42%;
-      top: 0;
-    }
-
-    .map-road-v2 {
-      position: absolute;
-      background-color: #ffffff;
-      width: 12px;
-      height: 100%;
-      left: 78%;
-      top: 0;
-    }
-
-    .map-road-h1 {
-      position: absolute;
-      background-color: #ffffff;
-      height: 12px;
-      width: 100%;
-      top: 62%;
-      left: 0;
-    }
-
-    /* Map Pins */
     .map-pin {
-      position: absolute;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 16px;
-      font-weight: 800;
-      border: 2.5px solid #ffffff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      z-index: 5;
+      position: absolute; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 16px; font-weight: 800; border: 2.5px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.22); cursor: pointer; transition: 0.2s; z-index: 5;
     }
+    .map-pin.available { background-color: var(--green-primary); }
+    .map-pin.charging { background-color: var(--red-primary); }
+    .map-pin.selected { background-color: var(--blue-primary); width: 44px; height: 44px; box-shadow: 0 0 0 12px rgba(29, 99, 237, 0.2); z-index: 8; }
+    .pin-label { position: absolute; top: 44px; background: rgba(15,23,42,0.85); color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
+    .gps-user-dot { position: absolute; top: 72%; left: 38%; width: 16px; height: 16px; background-color: var(--blue-primary); border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 0 0 10px rgba(29,99,237,0.18); z-index: 4; }
+    .recenter-btn { position: absolute; right: 18px; bottom: 24px; width: 44px; height: 44px; border-radius: 50%; background: #ffffff; border: 1px solid var(--border-soft); box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: var(--blue-primary); font-size: 18px; cursor: pointer; z-index: 9; }
 
-    .map-pin:hover {
-      transform: scale(1.12);
-    }
+    .station-sheet { background-color: var(--card-bg); border-top-left-radius: 28px; border-top-right-radius: 28px; padding: 12px 22px 20px 22px; box-shadow: var(--shadow-card); z-index: 12; display: flex; flex-direction: column; gap: 14px; }
+    .sheet-handle { width: 42px; height: 5px; background-color: #cbd5e1; border-radius: 10px; align-self: center; margin-bottom: 2px; }
+    .station-title { font-size: 20px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+    .station-subrow { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-secondary); margin-top: -6px; }
+    .open-247 { color: var(--green-primary); font-weight: 700; }
+    .status-pills-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+    .pill-avail { background-color: var(--green-light); color: var(--green-primary); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+    .pill-occ { background-color: var(--orange-light); color: var(--orange-primary); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
 
-    .map-pin.available {
-      background-color: var(--green-primary);
-    }
+    .connectors-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .conn-btn { padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--border-soft); background-color: transparent; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-secondary); }
+    .conn-btn.free { color: var(--green-primary); }
+    .conn-btn.free.selected-conn { border-color: var(--blue-primary); background-color: var(--blue-light); color: var(--blue-primary); }
+    .conn-btn.in-use { color: var(--orange-primary); background-color: #fffbeb; cursor: not-allowed; opacity: 0.85; }
 
-    .map-pin.charging {
-      background-color: var(--red-primary);
-    }
+    .sheet-divider { height: 1px; background-color: var(--border-soft); margin: 2px 0; }
+    .tariff-row { display: flex; justify-content: space-between; align-items: center; }
+    .tariff-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .tariff-price { font-size: 24px; font-weight: 800; color: var(--text-primary); margin-top: 2px; }
+    .plug-spec-pill { background-color: var(--app-bg); color: var(--text-primary); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
-    .map-pin.selected {
-      background-color: var(--blue-primary);
-      width: 44px;
-      height: 44px;
-      box-shadow: 0 0 0 12px rgba(29, 99, 237, 0.2);
-      z-index: 8;
-    }
+    .btn-start-charging { background-color: var(--blue-primary); color: #ffffff; border: none; border-radius: 16px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(29, 99, 237, 0.3); transition: 0.2s; }
+    .btn-start-charging:active { transform: scale(0.98); }
 
-    .pin-label {
-      position: absolute;
-      top: 44px;
-      background: rgba(15, 23, 42, 0.85);
-      color: #ffffff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 6px;
-      white-space: nowrap;
-      pointer-events: none;
-    }
+    .charging-live-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: #ffffff; z-index: 30; display: none; flex-direction: column; padding: 28px 24px; justify-content: space-between; animation: fadeIn 0.3s ease; }
+    .charging-live-overlay.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* User GPS Blue Dot */
-    .gps-user-dot {
-      position: absolute;
-      top: 72%;
-      left: 38%;
-      width: 16px;
-      height: 16px;
-      background-color: var(--blue-primary);
-      border: 3px solid #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 0 0 10px rgba(29, 99, 237, 0.18);
-      z-index: 4;
-    }
+    .live-top-bar { display: flex; justify-content: space-between; align-items: center; }
+    .live-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .live-pulse { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulseDot 1.4s infinite; }
+    @keyframes pulseDot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } }
 
-    .recenter-btn {
-      position: absolute;
-      right: 18px;
-      bottom: 24px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: 1px solid var(--border-soft);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--blue-primary);
-      font-size: 18px;
-      cursor: pointer;
-      z-index: 9;
-    }
+    .progress-circle-wrap { width: 220px; height: 220px; border-radius: 50%; border: 10px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-right-color: #10b981; margin: 10px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(59, 130, 246, 0.25); position: relative; }
+    .soc-big { font-size: 46px; font-weight: 800; letter-spacing: -1px; }
+    .kw-live-label { font-size: 16px; color: #60a5fa; font-weight: 700; margin-top: 4px; }
+    .car-tag { font-size: 12px; color: #94a3b8; margin-top: 6px; }
 
-    /* --- 5. Station Details Bottom Sheet (Exact Phase 4 Match) --- */
-    .station-sheet {
-      background-color: var(--card-bg);
-      border-top-left-radius: 28px;
-      border-top-right-radius: 28px;
-      padding: 12px 22px 20px 22px;
-      box-shadow: var(--shadow-card);
-      z-index: 12;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    .telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .telemetry-box { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); padding: 14px 16px; border-radius: 14px; }
+    .telemetry-box span { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; display: block; }
+    .telemetry-box strong { font-size: 20px; font-weight: 800; color: #f8fafc; margin-top: 4px; display: block; }
 
-    .sheet-handle {
-      width: 42px;
-      height: 5px;
-      background-color: #cbd5e1;
-      border-radius: 10px;
-      align-self: center;
-      margin-bottom: 2px;
-    }
+    .btn-stop-charging { background-color: var(--red-primary); color: #ffffff; border: none; border-radius: 16px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35); }
 
-    .station-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.3px;
-    }
+    .tab-inner-padding { padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; }
+    .tab-heading { font-size: 20px; font-weight: 800; color: var(--text-primary); }
+    .session-card { background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .rfid-visual-card { background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%); color: #ffffff; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; height: 190px; box-shadow: 0 12px 24px rgba(29, 78, 216, 0.3); }
 
-    .station-subrow {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: -6px;
-    }
-
-    .open-247 {
-      color: var(--green-primary);
-      font-weight: 700;
-    }
-
-    .status-pills-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .pill-avail {
-      background-color: var(--green-light);
-      color: var(--green-primary);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 12px;
-    }
-
-    .pill-occ {
-      background-color: var(--orange-light);
-      color: var(--orange-primary);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 12px;
-    }
-
-    /* Connector Selector Buttons (A1, A2, A3) */
-    .connectors-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .conn-btn {
-      padding: 10px 8px;
-      border-radius: 12px;
-      border: 1.5px solid var(--border-soft);
-      background-color: #ffffff;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-    }
-
-    .conn-btn.free {
-      color: var(--green-primary);
-    }
-
-    .conn-btn.free.selected-conn {
-      border-color: var(--blue-primary);
-      background-color: var(--blue-light);
-      color: var(--blue-primary);
-    }
-
-    .conn-btn.in-use {
-      color: var(--orange-primary);
-      background-color: #fffbeb;
-      cursor: not-allowed;
-      opacity: 0.85;
-    }
-
-    .sheet-divider {
-      height: 1px;
-      background-color: var(--border-soft);
-      margin: 2px 0;
-    }
-
-    .tariff-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .tariff-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      letter-spacing: 0.6px;
-    }
-
-    .tariff-price {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-top: 2px;
-    }
-
-    .plug-spec-pill {
-      background-color: #f1f5f9;
-      color: var(--text-primary);
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-start-charging {
-      background-color: var(--blue-primary);
-      color: #ffffff;
-      border: none;
-      border-radius: 16px;
-      padding: 16px;
-      font-size: 17px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 8px 20px rgba(29, 99, 237, 0.3);
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .btn-start-charging:hover {
-      background-color: var(--blue-hover);
-    }
-
-    .btn-start-charging:active {
-      transform: scale(0.98);
-    }
-
-    /* --- 6. Live Active Charging Overlay Screen (Phase 4 Screen 3) --- */
-    .charging-live-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-      color: #ffffff;
-      z-index: 30;
-      display: none;
-      flex-direction: column;
-      padding: 28px 24px;
-      justify-content: space-between;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .charging-live-overlay.active {
-      display: flex;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .live-top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .live-badge {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .live-pulse {
-      width: 8px;
-      height: 8px;
-      background: #10b981;
-      border-radius: 50%;
-      animation: pulseDot 1.4s infinite;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.5; }
-    }
-
-    .progress-circle-wrap {
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      border: 10px solid rgba(59, 130, 246, 0.2);
-      border-top-color: #3b82f6;
-      border-right-color: #10b981;
-      margin: 10px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 40px rgba(59, 130, 246, 0.25);
-      position: relative;
-    }
-
-    .soc-big {
-      font-size: 46px;
-      font-weight: 800;
-      letter-spacing: -1px;
-    }
-
-    .kw-live-label {
-      font-size: 16px;
-      color: #60a5fa;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .car-tag {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-top: 6px;
-    }
-
-    .telemetry-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .telemetry-box {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 14px 16px;
-      border-radius: 14px;
-    }
-
-    .telemetry-box span {
-      font-size: 11px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      font-weight: 700;
-      display: block;
-    }
-
-    .telemetry-box strong {
-      font-size: 20px;
-      font-weight: 800;
-      color: #f8fafc;
-      margin-top: 4px;
-      display: block;
-    }
-
-    .btn-stop-charging {
-      background-color: var(--red-primary);
-      color: #ffffff;
-      border: none;
-      border-radius: 16px;
-      padding: 16px;
-      font-size: 17px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
-      transition: 0.2s;
-    }
-
-    .btn-stop-charging:hover {
-      background-color: #b91c1c;
-    }
-
-    /* --- 7. Secondary Tabs (My Sessions, RFID Cards, Profile) --- */
-    .tab-inner-padding {
-      padding: 20px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .tab-heading {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .session-card {
-      background: #ffffff;
-      border: 1px solid var(--border-soft);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .rfid-visual-card {
-      background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
-      color: #ffffff;
-      border-radius: 20px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 190px;
-      box-shadow: 0 12px 24px rgba(29, 78, 216, 0.3);
-    }
-
-    /* --- 8. Bottom Navigation Bar (4 Tabs from Phase 4) --- */
-    .bottom-nav {
-      background-color: var(--card-bg);
-      border-top: 1px solid var(--border-soft);
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      padding: 10px 8px 16px 8px;
-      z-index: 20;
-    }
-
-    .bnav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      background: none;
-    }
-
-    .bnav-item.active {
-      color: var(--blue-primary);
-      font-weight: 700;
-    }
-
-    .bnav-icon {
-      font-size: 18px;
-    }
+    .bottom-nav { background-color: var(--card-bg); border-top: 1px solid var(--border-soft); display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px 8px 16px 8px; z-index: 20; }
+    .bnav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; border: none; background: none; }
+    .bnav-item.active { color: var(--blue-primary); font-weight: 700; }
+    .bnav-icon { font-size: 18px; }
   </style>
 </head>
 <body>
 
-  <!-- Desktop Switcher Bar so you can jump between Driver App & Admin CSMS -->
+  <!-- Desktop Presentation Switcher Bar -->
   <div class="demo-toolbar">
     <span>📱 <strong>ChargeTrack EV Driver App</strong> (OCPP Live Client)</span>
     <a href="index.html">Open Admin CSMS ➔</a>
   </div>
 
-  <!-- Mobile Phone Container -->
   <div class="phone-frame">
-
-    <!-- 1. iOS Status Bar -->
+    <!-- iOS Status Bar with Embedded Theme Switcher -->
     <div class="ios-status-bar">
       <span id="phone-clock">9:41</span>
-      <div class="status-icons">
-        <span>📶</span>
-        <span>🛜</span>
-        <span>🔋</span>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button onclick="toggleDriverTheme()" id="driverThemeBtn" style="background: none; border: none; font-size: 14px; cursor: pointer;" title="Toggle Day/Night">☀️</button>
+        <div class="status-icons"><span>📶</span><span>🛜</span><span>🔋</span></div>
       </div>
     </div>
 
-    <!-- 2. Top Search & Wallet Balance Header -->
+    <!-- Top Wallet Header -->
     <div class="top-header-card">
       <div class="search-row">
         <div class="search-input-wrap">
           <span style="color: #94a3b8;">🔍</span>
           <input type="text" id="station-search" placeholder="Search suburb, mall or charger" oninput="filterStationsBySearch()" />
         </div>
-        <button class="filter-btn" id="dc-filter-btn" onclick="toggleFastFilter()" title="Filter DC Fast Chargers">⚡</button>
+        <button class="filter-btn" id="dc-filter-btn" onclick="toggleFastFilter()">⚡</button>
       </div>
-
       <div class="wallet-bar">
-        <div class="wallet-left">
-          <span>💳</span>
-          <span>Wallet Balance</span>
-          <span class="wallet-amount" id="wallet-balance-text">R500.00</span>
-        </div>
+        <div class="wallet-left"><span>💳</span><span>Wallet Balance</span><span class="wallet-amount" id="wallet-balance-text">R500.00</span></div>
         <button class="topup-btn" onclick="topUpWallet()">Top up &gt;</button>
       </div>
     </div>
 
-    <!-- =====================================================================
-         TAB 1: INTERACTIVE MAP & STATION BOTTOM SHEET
-         ===================================================================== -->
+    <!-- TAB 1: INTERACTIVE MAP -->
     <div id="tab-map" class="mobile-tab-view active">
-      
-      <!-- Interactive Gauteng Map Canvas -->
       <div class="map-canvas" id="map-canvas">
         <div class="map-block" style="width: 120px; height: 70px; top: 18px; left: 32px;"></div>
         <div class="map-block" style="width: 130px; height: 80px; top: 14px; left: 210px;"></div>
         <div class="map-park" style="width: 140px; height: 110px; top: 145px; left: 12px;"></div>
         <div class="map-block" style="width: 120px; height: 110px; top: 145px; left: 190px;"></div>
-
-        <!-- Roads -->
-        <div class="map-road-v1"></div>
-        <div class="map-road-v2"></div>
-        <div class="map-road-h1"></div>
-        <div class="map-highway"></div>
-
-        <!-- User GPS Location Dot -->
+        <div class="map-road-v1"></div><div class="map-road-v2"></div><div class="map-road-h1"></div><div class="map-highway"></div>
         <div class="gps-user-dot" title="Your Location (Midrand)"></div>
-
-        <!-- Dynamic Map Pins Injected by JS -->
         <div id="map-pins-layer"></div>
-
-        <!-- Recenter GPS Button -->
-        <button class="recenter-btn" onclick="recenterMap()" title="Center on Mall of Africa">🧭</button>
+        <button class="recenter-btn" onclick="recenterMap()">🧭</button>
       </div>
 
       <!-- Station Details Bottom Sheet -->
       <div class="station-sheet">
         <div class="sheet-handle"></div>
-
         <div class="station-title" id="sheet-station-name">Mall of Africa - Fast Charging</div>
-        <div class="station-subrow">
-          <span id="sheet-station-suburb">Waterfall, Midrand · 1.2 km away</span>
-          <span class="open-247">Open 24/7</span>
-        </div>
+        <div class="station-subrow"><span id="sheet-station-suburb">Waterfall, Midrand · 1.2 km away</span><span class="open-247">Open 24/7</span></div>
+        <div class="status-pills-row"><span>Status</span><span class="pill-avail" id="sheet-avail-badge">● 2 Available</span><span class="pill-occ" id="sheet-occ-badge">● 1 Occupied</span></div>
 
-        <div class="status-pills-row">
-          <span>Status</span>
-          <span class="pill-avail" id="sheet-avail-badge">● 2 Available</span>
-          <span class="pill-occ" id="sheet-occ-badge">● 1 Occupied</span>
-        </div>
-
-        <!-- Connector Selection Buttons -->
         <div class="connectors-row" id="connectors-row">
           <button class="conn-btn free selected-conn" onclick="selectConnector('A1', this)">A1 · Free</button>
           <button class="conn-btn free" onclick="selectConnector('A2', this)">A2 · Free</button>
@@ -872,179 +301,123 @@
         </div>
 
         <div class="sheet-divider"></div>
-
         <div class="tariff-row">
-          <div>
-            <div class="tariff-label" id="sheet-tariff-label">TARIFF · FAST (150 KW)</div>
-            <div class="tariff-price" id="sheet-tariff-price">R7.50 / kWh</div>
-          </div>
-          <div class="plug-spec-pill" id="sheet-plug-pill">
-            <span style="color: var(--blue-primary);">⚡</span> CCS2 · 150 kW
-          </div>
+          <div><div class="tariff-label" id="sheet-tariff-label">TARIFF · FAST (150 KW)</div><div class="tariff-price" id="sheet-tariff-price">R7.50 / kWh</div></div>
+          <div class="plug-spec-pill" id="sheet-plug-pill"><span style="color: var(--blue-primary);">⚡</span> CCS2 · 150 kW</div>
         </div>
 
-        <button class="btn-start-charging" onclick="startLiveChargingSession()">
-          <span>⚡</span> Start Charging
-        </button>
+        <button class="btn-start-charging" onclick="startLiveChargingSession()"><span>⚡</span> Start Charging</button>
       </div>
-
     </div>
 
-    <!-- =====================================================================
-         TAB 2: MY SESSIONS (CHARGING SESSION LOGGER)
-         ===================================================================== -->
+    <!-- TAB 2: MY SESSIONS -->
     <div id="tab-sessions" class="mobile-tab-view">
       <div class="tab-inner-padding">
         <div class="tab-heading">Charging Session Logger</div>
-        <p style="font-size: 13px; color: var(--text-secondary); margin-top: -8px;">
-          Official SARS & POPIA compliant Charge Detail Records (CDRs) for your BYD Dolphin Surf.
-        </p>
-        <div id="driver-sessions-list" style="display: flex; flex-direction: column; gap: 12px;">
-          <!-- Populated dynamically -->
-        </div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: -8px;">Official SARS & POPIA compliant Charge Detail Records (CDRs).</p>
+        <div id="driver-sessions-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
       </div>
     </div>
 
-    <!-- =====================================================================
-         TAB 3: RFID CARDS & DIGITAL KEY
-         ===================================================================== -->
+    <!-- TAB 3: RFID CARDS -->
     <div id="tab-rfid" class="mobile-tab-view">
       <div class="tab-inner-padding">
         <div class="tab-heading">RFID Cards & Digital Key</div>
         <div class="rfid-visual-card">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 800; font-size: 16px;">⚡ ChargeTrack ChargePocket</span>
-            <span style="background: rgba(16,185,129,0.25); color: #6ee7b7; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">ACTIVE WHITELIST</span>
-          </div>
-          <div>
-            <div style="font-size: 11px; opacity: 0.75; text-transform: uppercase;">OCPP Offline & Online Token ID</div>
-            <div style="font-family: monospace; font-size: 20px; font-weight: 800; letter-spacing: 1px; margin-top: 4px;">RFID_TAG_9921</div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 12px; opacity: 0.9;">
-            <span>Vehicle: BYD Dolphin Surf</span>
-            <span>Auto-Charge: Enabled</span>
-          </div>
-        </div>
-
-        <div class="session-card">
-          <div style="font-weight: 700; color: var(--text-primary);">Offline Load-Shedding Whitelist</div>
-          <p style="font-size: 13px; color: var(--text-secondary);">
-            Your RFID card is cached locally on all 11 Gauteng GridCars stations so you can still initiate charging sessions if cellular signal drops.
-          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 800; font-size: 16px;">⚡ ChargeTrack Pocket</span><span style="background: rgba(16,185,129,0.25); color: #6ee7b7; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">ACTIVE</span></div>
+          <div><div style="font-size: 11px; opacity: 0.75; text-transform: uppercase;">OCPP Token ID</div><div style="font-family: monospace; font-size: 20px; font-weight: 800; letter-spacing: 1px; margin-top: 4px;">RFID_TAG_9921</div></div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; opacity: 0.9;"><span>Vehicle: BYD Dolphin Surf</span><span>Auto-Charge: Enabled</span></div>
         </div>
       </div>
     </div>
 
-    <!-- =====================================================================
-         TAB 4: DRIVER PROFILE & VEHICLE SPECS
-         ===================================================================== -->
+    <!-- TAB 4: PROFILE -->
     <div id="tab-profile" class="mobile-tab-view">
       <div class="tab-inner-padding">
         <div class="tab-heading">EV Driver Profile</div>
-
         <div class="session-card">
           <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Primary Registered EV</div>
-          <div style="font-size: 18px; font-weight: 800; color: var(--text-primary);">BYD Dolphin Surf Comfort</div>
-          <div style="font-size: 13px; color: var(--text-secondary);">Battery Capacity: <strong>31.0 kWh Blade Battery</strong></div>
+          <div style="font-size: 18px; font-weight: 800; color: var(--text-primary);">BYD Dolphin Surf</div>
+          <div style="font-size: 13px; color: var(--text-secondary);">Battery Capacity: <strong>31.0 kWh</strong></div>
           <div style="font-size: 13px; color: var(--text-secondary);">WLTP Rated Range: <strong>230 km (100% SOC)</strong></div>
-          <div style="font-size: 13px; color: var(--text-secondary);">Max Charge Rate: <strong>40 kW DC / 7 kW AC</strong></div>
         </div>
-
-        <button class="btn-start-charging" style="background: #0f172a;" onclick="window.location.href='index.html'">
-          Switch to Admin CSMS Dashboard
-        </button>
-        <button class="btn-start-charging" style="background: #ef4444;" onclick="window.location.href='login.html'">
-          Sign Out of Account
-        </button>
       </div>
     </div>
 
-    <!-- =====================================================================
-         ACTIVE CHARGING OVERLAY SCREEN (Appears when charging is running)
-         ===================================================================== -->
+    <!-- ACTIVE CHARGING OVERLAY -->
     <div class="charging-live-overlay" id="charging-overlay">
       <div class="live-top-bar">
-        <div>
-          <div style="font-size: 18px; font-weight: 800;" id="live-station-title">Mall of Africa</div>
-          <div style="font-size: 12px; color: #94a3b8;" id="live-connector-sub">Connector A1 · OCPP 2.0.1 Stream</div>
-        </div>
-        <div class="live-badge">
-          <div class="live-pulse"></div>
-          <span>CHARGING</span>
-        </div>
+        <div><div style="font-size: 18px; font-weight: 800;" id="live-station-title">Mall of Africa</div><div style="font-size: 12px; color: #94a3b8;" id="live-connector-sub">Connector A1</div></div>
+        <div class="live-badge"><div class="live-pulse"></div><span>CHARGING</span></div>
       </div>
-
       <div class="progress-circle-wrap">
         <div class="soc-big" id="live-soc-display">45%</div>
         <div class="kw-live-label" id="live-kw-display">38.5 kW</div>
         <div class="car-tag">BYD Dolphin Surf (31 kWh)</div>
       </div>
-
       <div class="telemetry-grid">
-        <div class="telemetry-box">
-          <span>Energy Delivered</span>
-          <strong id="live-kwh-delivered">0.00 kWh</strong>
-        </div>
-        <div class="telemetry-box">
-          <span>Live Session Cost</span>
-          <strong id="live-cost-zar" style="color: #34d399;">R 0.00</strong>
-        </div>
-        <div class="telemetry-box">
-          <span>Estimated Range</span>
-          <strong id="live-range-km">104 km / 230 km</strong>
-        </div>
-        <div class="telemetry-box">
-          <span>Session Duration</span>
-          <strong id="live-timer">00:00</strong>
-        </div>
+        <div class="telemetry-box"><span>Energy Delivered</span><strong id="live-kwh-delivered">0.00 kWh</strong></div>
+        <div class="telemetry-box"><span>Live Session Cost</span><strong id="live-cost-zar" style="color: #34d399;">R 0.00</strong></div>
+        <div class="telemetry-box"><span>Estimated Range</span><strong id="live-range-km">104 km / 230 km</strong></div>
+        <div class="telemetry-box"><span>Session Duration</span><strong id="live-timer">00:00</strong></div>
       </div>
-
-      <button class="btn-stop-charging" onclick="stopLiveChargingSession()">
-        🛑 Stop Session &amp; Settle Wallet
-      </button>
+      <button class="btn-stop-charging" onclick="stopLiveChargingSession()">🛑 Stop Session &amp; Settle</button>
     </div>
 
-    <!-- 8. Bottom Navigation Bar -->
+    <!-- BOTTOM NAV -->
     <div class="bottom-nav">
-      <button class="bnav-item active" onclick="switchMobileTab('tab-map', this)">
-        <span class="bnav-icon">🗺️</span>
-        <span>Map</span>
-      </button>
-      <button class="bnav-item" onclick="switchMobileTab('tab-sessions', this)">
-        <span class="bnav-icon">🕒</span>
-        <span>My Sessions</span>
-      </button>
-      <button class="bnav-item" onclick="switchMobileTab('tab-rfid', this)">
-        <span class="bnav-icon">💳</span>
-        <span>RFID Cards</span>
-      </button>
-      <button class="bnav-item" onclick="switchMobileTab('tab-profile', this)">
-        <span class="bnav-icon">👤</span>
-        <span>Profile</span>
-      </button>
+      <button class="bnav-item active" onclick="switchMobileTab('tab-map', this)"><span class="bnav-icon">🗺️</span><span>Map</span></button>
+      <button class="bnav-item" onclick="switchMobileTab('tab-sessions', this)"><span class="bnav-icon">🕒</span><span>My Sessions</span></button>
+      <button class="bnav-item" onclick="switchMobileTab('tab-rfid', this)"><span class="bnav-icon">💳</span><span>RFID</span></button>
+      <button class="bnav-item" onclick="switchMobileTab('tab-profile', this)"><span class="bnav-icon">👤</span><span>Profile</span></button>
     </div>
 
   </div>
 
-  <!-- =========================================================================
-       JAVASCRIPT ENGINE: REAL-TIME WEBSOCKETS, MAP PINS & CHARGING METER
-       ========================================================================= -->
   <script>
+    /**
+     * @function toggleDriverTheme
+     * @description Explicitly toggles the Driver App between Light and Dark mode.
+     */
+    function toggleDriverTheme() {
+      const body = document.body;
+      const btn = document.getElementById('driverThemeBtn');
+      
+      if (body.classList.contains('light-driver')) {
+        body.classList.remove('light-driver');
+        if (btn) btn.innerText = '☀️';
+        localStorage.setItem('chargetrack_driver_theme', 'dark');
+      } else {
+        body.classList.add('light-driver');
+        if (btn) btn.innerText = '🌙';
+        localStorage.setItem('chargetrack_driver_theme', 'light');
+      }
+    }
+
+    // Apply saved theme on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('chargetrack_driver_theme') === 'light') {
+        document.body.classList.add('light-driver');
+        const btn = document.getElementById('driverThemeBtn');
+        if (btn) btn.innerText = '🌙';
+      }
+    });
+
     // 1. Wallet & Session State
     let walletBalance = parseFloat(localStorage.getItem('ct_driver_wallet') || '500.00');
-    let selectedStationId = 'GC-MID-01'; // Default to Mall of Africa from Phase 4 wireframe
+    let selectedStationId = 'GC-MID-01'; 
     let selectedConnectorId = 'A1';
     let dcFastOnlyFilter = false;
 
     // Active Charging Telemetry State
     let isChargingActive = false;
     let chargingInterval = null;
-    let currentSoc = 45; // Starting battery % on BYD Dolphin Surf (31 kWh)
+    let currentSoc = 45; 
     let kwhDelivered = 0;
     let sessionSeconds = 0;
     let currentKwRate = 38.5;
 
-    // 2. Coordinates & Metadata for Gauteng Stations on the Mobile Map
+    // 2. Map Coordinates
     const stationMapLayout = {
       "GC-MID-01": { name: "Mall of Africa - Fast Charging", suburb: "Waterfall, Midrand · 1.2 km away", top: "42%", left: "48%", rate: 7.50, maxKw: 150, type: "DC" },
       "GC-JHB-01": { name: "Sandton City Hub - Bay 1", suburb: "Sandton, JHB · 14.5 km away", top: "28%", left: "30%", rate: 7.50, maxKw: 60, type: "DC" },
@@ -1063,33 +436,27 @@
       { id: "GC-EKU-01", name: "OR Tambo Int. Airport", status: "Charging", currentKw: 52.4, type: "DC" }
     ];
 
-    // Historical Sessions for "My Sessions" Tab
     let completedSessions = JSON.parse(localStorage.getItem('ct_driver_sessions') || JSON.stringify([
-      { id: "CDR-2026-9088", station: "Mall of Africa - Fast Charging", kwh: "14.20", cost: "106.50", date: "Yesterday, 17:40" },
-      { id: "CDR-2026-9079", station: "Springs Mall AC Station", kwh: "14.80", cost: "86.58", date: "15 Oct 2026, 11:15" }
+      { id: "CDR-2026-9088", station: "Mall of Africa - Fast Charging", kwh: "14.20", cost: "106.50", date: "Yesterday, 17:40" }
     ]));
 
-    // 3. Connect to OCPP WebSocket Server
+    // 3. Connect WebSocket
     let socket = null;
     function connectDriverWebSocket() {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         socket = new WebSocket(protocol + window.location.host);
-
         socket.onmessage = (event) => {
           const payload = JSON.parse(event.data);
           if (payload.data && Array.isArray(payload.data)) {
             liveServerStations = payload.data;
-            renderMapPins();
-            updateBottomSheetDetails();
+            renderMapPins(); updateBottomSheetDetails();
           }
         };
-      } catch (err) {
-        console.warn("Running Driver App in standalone simulation mode.");
-      }
+      } catch (err) {}
     }
 
-    // 4. Render Interactive Map Pins
+    // 4. Interactive Map
     function renderMapPins() {
       const layer = document.getElementById('map-pins-layer');
       const query = document.getElementById('station-search').value.trim().toLowerCase();
@@ -1097,40 +464,30 @@
       layer.innerHTML = Object.keys(stationMapLayout).map(id => {
         const meta = stationMapLayout[id];
         const serverItem = liveServerStations.find(s => s.id === id) || { status: "Available" };
-
         if (dcFastOnlyFilter && meta.type !== "DC") return '';
         if (query && !meta.name.toLowerCase().includes(query) && !meta.suburb.toLowerCase().includes(query)) return '';
-
-        const isSelected = (id === selectedStationId);
-        const statusClass = isSelected ? 'selected' : (serverItem.status === 'Charging' ? 'charging' : 'available');
-
-        return `
-          <div class="map-pin ${statusClass}" style="top: ${meta.top}; left: ${meta.left};" onclick="selectStationPin('${id}')">
-            ⚡
-            <span class="pin-label">${meta.name.split(' ')[0]}</span>
-          </div>
-        `;
+        
+        const isSel = (id === selectedStationId);
+        const stClass = isSel ? 'selected' : (serverItem.status === 'Charging' ? 'charging' : 'available');
+        return `<div class="map-pin ${stClass}" style="top: ${meta.top}; left: ${meta.left};" onclick="selectStationPin('${id}')">⚡<span class="pin-label">${meta.name.split(' ')[0]}</span></div>`;
       }).join('');
     }
 
-    function selectStationPin(stationId) {
-      selectedStationId = stationId;
-      renderMapPins();
-      updateBottomSheetDetails();
-    }
+    function selectStationPin(id) { selectedStationId = id; renderMapPins(); updateBottomSheetDetails(); }
+    function filterStationsBySearch() { renderMapPins(); }
+    function toggleFastFilter() { dcFastOnlyFilter = !dcFastOnlyFilter; document.getElementById('dc-filter-btn').classList.toggle('active-filter', dcFastOnlyFilter); renderMapPins(); }
+    function recenterMap() { selectStationPin('GC-MID-01'); }
 
     function updateBottomSheetDetails() {
       const meta = stationMapLayout[selectedStationId];
       if (!meta) return;
-
-      const serverItem = liveServerStations.find(s => s.id === selectedStationId) || { status: "Available" };
-      const isOccupied = serverItem.status === 'Charging';
+      const srv = liveServerStations.find(s => s.id === selectedStationId) || { status: "Available" };
+      const isOcc = srv.status === 'Charging';
 
       document.getElementById('sheet-station-name').innerText = meta.name;
       document.getElementById('sheet-station-suburb').innerText = meta.suburb;
-      document.getElementById('sheet-avail-badge').innerText = isOccupied ? '● 1 Available' : '● 2 Available';
-      document.getElementById('sheet-occ-badge').innerText = isOccupied ? '● 2 Occupied' : '● 1 Occupied';
-
+      document.getElementById('sheet-avail-badge').innerText = isOcc ? '● 1 Available' : '● 2 Available';
+      document.getElementById('sheet-occ-badge').innerText = isOcc ? '● 2 Occupied' : '● 1 Occupied';
       document.getElementById('sheet-tariff-label').innerText = `TARIFF · ${meta.type === 'DC' ? 'FAST' : 'DESTINATION'} (${meta.maxKw} KW)`;
       document.getElementById('sheet-tariff-price').innerText = `R${meta.rate.toFixed(2)} / kWh`;
       document.getElementById('sheet-plug-pill').innerHTML = `<span style="color: var(--blue-primary);">⚡</span> ${meta.type === 'DC' ? 'CCS2' : 'Type 2'} · ${meta.maxKw} kW`;
@@ -1142,181 +499,94 @@
       btnEl.classList.add('selected-conn');
     }
 
-    function filterStationsBySearch() {
-      renderMapPins();
-    }
-
-    function toggleFastFilter() {
-      dcFastOnlyFilter = !dcFastOnlyFilter;
-      document.getElementById('dc-filter-btn').classList.toggle('active-filter', dcFastOnlyFilter);
-      renderMapPins();
-    }
-
-    function recenterMap() {
-      selectStationPin('GC-MID-01');
-    }
-
-    // 5. Wallet Management
+    // 5. Wallet
     function updateWalletUI() {
       document.getElementById('wallet-balance-text').innerText = `R${walletBalance.toFixed(2)}`;
       localStorage.setItem('ct_driver_wallet', walletBalance.toFixed(2));
     }
 
     function topUpWallet() {
-      const amountStr = prompt("Enter amount in ZAR to top up your GridCars ChargePocket Wallet:", "100");
-      const amount = parseFloat(amountStr);
-      if (!isNaN(amount) && amount > 0) {
-        walletBalance += amount;
-        updateWalletUI();
-        alert(`✅ R${amount.toFixed(2)} added to your ChargeTrack Wallet!`);
-      }
+      const amt = parseFloat(prompt("Enter ZAR to top up:", "100"));
+      if (!isNaN(amt) && amt > 0) { walletBalance += amt; updateWalletUI(); alert(`✅ R${amt.toFixed(2)} added!`); }
     }
 
-    // 6. Start & Stop Real-Time Charging Session
+    // 6. Charging Logic
     function startLiveChargingSession() {
-      if (walletBalance < 20) {
-        alert("⚠️ Insufficient Wallet Balance (Minimum R20 required). Please tap 'Top up >' first.");
-        return;
-      }
+      if (walletBalance < 20) { alert("⚠️ Insufficient Wallet Balance."); return; }
 
       const meta = stationMapLayout[selectedStationId];
-      isChargingActive = true;
-      kwhDelivered = 0;
-      sessionSeconds = 0;
-      currentKwRate = meta.type === 'DC' ? 38.5 : 7.0; // Realistic BYD Dolphin Surf charging curve
+      isChargingActive = true; kwhDelivered = 0; sessionSeconds = 0; currentKwRate = meta.type === 'DC' ? 38.5 : 7.0;
 
-      // Show Live Charging Screen
       document.getElementById('live-station-title').innerText = meta.name;
-      document.getElementById('live-connector-sub').innerText = `Connector ${selectedConnectorId} · OCPP 2.0.1 Live Transaction`;
+      document.getElementById('live-connector-sub').innerText = `Connector ${selectedConnectorId}`;
       document.getElementById('charging-overlay').classList.add('active');
 
-      // Notify Backend Server via WebSocket so Admin Dashboard updates live!
       if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          action: "RemoteStartTransaction",
-          chargerId: selectedStationId,
-          connectorId: selectedConnectorId,
-          idTag: "RFID_TAG_9921",
-          kwDraw: currentKwRate
-        }));
+        socket.send(JSON.stringify({ action: "RemoteStartTransaction", chargerId: selectedStationId, connectorId: selectedConnectorId, idTag: "RFID_TAG_9921", kwDraw: currentKwRate }));
       }
 
-      // Start 1-second real-time charging telemetry loop
       chargingInterval = setInterval(() => {
         sessionSeconds++;
-        // Accelerate simulation slightly so 1 second = ~0.08 kWh delivered for live demo visibility
-        const incrementKwh = meta.type === 'DC' ? 0.08 : 0.02;
-        kwhDelivered += incrementKwh;
+        const inc = meta.type === 'DC' ? 0.08 : 0.02;
+        kwhDelivered += inc;
 
-        // Calculate new SOC % on 31 kWh BYD Dolphin Surf battery
-        const addedSoc = (kwhDelivered / 31.0) * 100;
-        const liveSoc = Math.min(100, Math.round(currentSoc + addedSoc));
-        const liveRangeKm = Math.round((liveSoc / 100) * 230); // 230km Max Range
+        const addSoc = (kwhDelivered / 31.0) * 100;
+        const liveSoc = Math.min(100, Math.round(currentSoc + addSoc));
+        const liveRange = Math.round((liveSoc / 100) * 230);
         const liveCost = kwhDelivered * meta.rate;
+        const jKw = (currentKwRate + (Math.random() * 1.6 - 0.8)).toFixed(1);
 
-        // Fluctuate kW slightly for realistic telemetry
-        const jitterKw = (currentKwRate + (Math.random() * 1.6 - 0.8)).toFixed(1);
-
-        // Format mm:ss timer
-        const mins = Math.floor(sessionSeconds / 60).toString().padStart(2, '0');
-        const secs = (sessionSeconds % 60).toString().padStart(2, '0');
-
-        // Update DOM
         document.getElementById('live-soc-display').innerText = `${liveSoc}%`;
-        document.getElementById('live-kw-display').innerText = `${jitterKw} kW`;
+        document.getElementById('live-kw-display').innerText = `${jKw} kW`;
         document.getElementById('live-kwh-delivered').innerText = `${kwhDelivered.toFixed(2)} kWh`;
         document.getElementById('live-cost-zar').innerText = `R ${liveCost.toFixed(2)}`;
-        document.getElementById('live-range-km').innerText = `${liveRangeKm} km / 230 km`;
-        document.getElementById('live-timer').innerText = `${mins}:${secs}`;
+        document.getElementById('live-range-km').innerText = `${liveRange} km / 230 km`;
+        document.getElementById('live-timer').innerText = `${Math.floor(sessionSeconds / 60).toString().padStart(2, '0')}:${(sessionSeconds % 60).toString().padStart(2, '0')}`;
 
-        if (liveSoc >= 100) {
-          stopLiveChargingSession();
-        }
+        if (liveSoc >= 100 || walletBalance <= liveCost) stopLiveChargingSession();
       }, 1000);
     }
 
     function stopLiveChargingSession() {
       if (!isChargingActive) return;
-      clearInterval(chargingInterval);
-      isChargingActive = false;
+      clearInterval(chargingInterval); isChargingActive = false;
 
       const meta = stationMapLayout[selectedStationId];
-      const finalCost = +(kwhDelivered * meta.rate).toFixed(2);
-      const finalKwh = +kwhDelivered.toFixed(2);
+      const cost = +(kwhDelivered * meta.rate).toFixed(2);
+      const kwh = +kwhDelivered.toFixed(2);
 
-      // Update starting battery SOC for next session
-      currentSoc = Math.min(100, Math.round(currentSoc + (finalKwh / 31.0) * 100));
+      currentSoc = Math.min(100, Math.round(currentSoc + (kwh / 31.0) * 100));
+      walletBalance = Math.max(0, walletBalance - cost); updateWalletUI();
 
-      // Deduct from Wallet
-      walletBalance = Math.max(0, walletBalance - finalCost);
-      updateWalletUI();
+      const cdr = { id: "CDR-2026-" + Math.floor(9100 + Math.random() * 800), station: meta.name, kwh: kwh.toFixed(2), cost: cost.toFixed(2), date: "Just now" };
+      completedSessions.unshift(cdr); localStorage.setItem('ct_driver_sessions', JSON.stringify(completedSessions)); renderSessionsHistory();
 
-      // Create new CDR Record
-      const newCdr = {
-        id: "CDR-2026-" + Math.floor(9100 + Math.random() * 800),
-        station: meta.name,
-        kwh: finalKwh.toFixed(2),
-        cost: finalCost.toFixed(2),
-        date: "Just now"
-      };
-      completedSessions.unshift(newCdr);
-      localStorage.setItem('ct_driver_sessions', JSON.stringify(completedSessions));
-      renderSessionsHistory();
-
-      // Notify Backend Server via WebSocket so Admin Dashboard sets charger back to Available
       if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          action: "RemoteStopTransaction",
-          chargerId: selectedStationId,
-          kwhDelivered: finalKwh,
-          totalCost: finalCost,
-          cdrId: newCdr.id
-        }));
+        socket.send(JSON.stringify({ action: "RemoteStopTransaction", chargerId: selectedStationId, kwhDelivered: kwh, totalCost: cost, cdrId: cdr.id }));
       }
 
-      // Close overlay and show official CDR receipt alert
       document.getElementById('charging-overlay').classList.remove('active');
-      alert(
-        `✅ CHARGING SESSION COMPLETE (${newCdr.id})\n\n` +
-        `Station: ${meta.name}\n` +
-        `Energy Delivered: ${newCdr.kwh} kWh\n` +
-        `Total Deducted: R${newCdr.cost}\n` +
-        `Remaining Wallet Balance: R${walletBalance.toFixed(2)}`
-      );
+      alert(`✅ SESSION COMPLETE\n\nEnergy: ${cdr.kwh} kWh\nDeducted: R${cdr.cost}\nRemaining Wallet: R${walletBalance.toFixed(2)}`);
     }
 
-    // 7. Render Completed Sessions List
     function renderSessionsHistory() {
-      const container = document.getElementById('driver-sessions-list');
-      container.innerHTML = completedSessions.map(s => `
+      document.getElementById('driver-sessions-list').innerHTML = completedSessions.map(s => `
         <div class="session-card">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: monospace; font-weight: 700; color: var(--blue-primary);">#${s.id}</span>
-            <span style="font-size: 12px; color: var(--text-muted);">${s.date}</span>
-          </div>
+          <div style="display: flex; justify-content: space-between;"><span style="font-family: monospace; font-weight: 700; color: var(--blue-primary);">#${s.id}</span><span style="font-size: 12px; color: var(--text-muted);">${s.date}</span></div>
           <div style="font-weight: 800; font-size: 15px; color: var(--text-primary);">${s.station}</div>
-          <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-soft); padding-top: 8px; font-size: 13px;">
-            <span>Energy: <strong>${s.kwh} kWh</strong></span>
-            <span style="color: var(--green-primary); font-weight: 800;">R ${s.cost} (Settled)</span>
-          </div>
+          <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-soft); padding-top: 8px; font-size: 13px;"><span>Energy: <strong>${s.kwh} kWh</strong></span><span style="color: var(--green-primary); font-weight: 800;">R ${s.cost}</span></div>
         </div>
       `).join('');
     }
 
-    // 8. Bottom Navigation Tab Switcher
-    function switchMobileTab(tabId, btnEl) {
+    function switchMobileTab(tId, btn) {
       document.querySelectorAll('.mobile-tab-view').forEach(t => t.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
+      document.getElementById(tId).classList.add('active');
       document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-      btnEl.classList.add('active');
+      btn.classList.add('active');
     }
 
-    // Initialize App on Load
-    updateWalletUI();
-    renderMapPins();
-    updateBottomSheetDetails();
-    renderSessionsHistory();
-    connectDriverWebSocket();
+    updateWalletUI(); renderMapPins(); updateBottomSheetDetails(); renderSessionsHistory(); connectDriverWebSocket();
   </script>
 </body>
 </html>
