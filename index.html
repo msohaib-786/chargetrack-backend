@@ -1232,19 +1232,29 @@
       const body = document.body;
       const btn = document.getElementById('themeToggleBtn');
       
-      // If currently Light Mode, force switch to Dark Mode
+      // Check if it is currently light mode
       if (body.classList.contains('light-theme')) {
+        // Force it back to Dark Mode
         body.classList.remove('light-theme');
         if (btn) btn.innerText = '☀️';
         localStorage.setItem('chargetrack_theme', 'dark');
-      } 
-      // If currently Dark Mode, force switch to Light Mode
-      else {
+      } else {
+        // Force it to Light Mode
         body.classList.add('light-theme');
         if (btn) btn.innerText = '🌙';
         localStorage.setItem('chargetrack_theme', 'light');
       }
     }
+
+    // Apply the saved theme when the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('chargetrack_theme') === 'light') {
+        document.body.classList.add('light-theme');
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) btn.innerText = '🌙';
+      }
+    });
+    
   </script>
 </body>
 </html>
