@@ -3,17 +3,49 @@ const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
 
-// Initialize Express
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Serve static assets from the current directory
-app.use(express.static(path.join(__dirname)));
+app.use(express.json());
 
-// Route root URL ('/') to serve the login page first
+// Route root URL ('/') to serve login.html BEFORE static middleware
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+// Serve static files with index disabled so '/' always goes to login.html
+app.use(express.static(path.join(__dirname), { index: false }));
+
+// In-memory account store for cloud sessions
+const accounts = [
+    { fullName: "Site Administrator", email: "admin@chargetrack.co.za", password: "admin123", role: "Operator Level 3", rfidTag: "RFID_TAG_9921" }
+];
+
+// Registration API Endpoint
+app.post('/api/register', (req, res) => {
+    const { fullName, email, role, rfidTag, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ error: "Email and password required" });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    if (accounts.some(acc => acc.email === cleanEmail)) {
+        return res.status(409).json({ error: "Account already exists" });
+    }
+    const newAccount = { fullName, email: cleanEmail, role, rfidTag, password };
+    accounts.push(newAccount);
+    res.status(201).json({ message: "Account created", user: { fullName, email: cleanEmail, role, rfidTag } });
+});
+
+// Login API Endpoint
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const user = accounts.find(acc => acc.email === cleanEmail && acc.password === password);
+    if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
+    res.json({ user: { fullName: user.fullName, email: user.email, role: user.role, rfidTag: user.rfidTag } });
 });
 
 const registeredUsers = {
@@ -21,7 +53,6 @@ const registeredUsers = {
     "RFID_TAG_4402": { name: "EV Driver 2", balance: 0.00 }
 };
 
-// Full 11-Station GridCars Gauteng Network
 let chargers = [
     { id: "GC-JHB-01", name: "Sandton City Hub - Bay 1", status: "Charging", currentKw: 45.2, type: "DC", firmware: "v1.4.2", ip: "192.168.1.10" },
     { id: "GC-JHB-02", name: "Sandton City Hub - Bay 2", status: "Available", currentKw: 0, type: "DC", firmware: "v1.4.2", ip: "192.168.1.11" },
