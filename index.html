@@ -42,6 +42,25 @@
       --border-radius-lg: 12px;
       --border-radius-md: 8px;
       --transition-speed: 0.2s;
+      /* --- Light Theme Overrides --- */
+    body.light-theme {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #f1f5f9;
+      --border-color: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-dark: #334155;
+    }
+    
+    /* Ensure the sidebar header adapts nicely to light mode */
+    body.light-theme .brand-container {
+      background-color: #ffffff;
+    }
+    body.light-theme .sidebar-footer {
+      background-color: #f1f5f9;
+    }
     }
 
     /* --- 2. Global Reset & Base Typography --- */
