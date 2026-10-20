@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ChargeTrack CSMS - Central Operations Platform for EV Infrastructure Management in South Africa" />
+  <meta name="description" content="ChargeTrack CSMS - Enterprise Central Operations Platform" />
+  <meta name="author" content="ChargeTrack Systems Engineering" />
   <title>ChargeTrack CSMS - Central Operations Platform</title>
   
-  <!-- External Library: Chart.js for Dynamic Load Management (DLM) Visualizer -->
+  <!-- Chart.js for Dynamic Load Management (DLM) Visualizer -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- =========================================================================
-       STYLESHEET (CSS)
-       Enterprise-grade structure utilizing CSS Variables, Flexbox and Grid layouts, 
-       Responsive Media Queries, and custom UI components (Modals/Toasts).
+       ENTERPRISE STYLESHEET (CSS)
+       Modular design system with CSS Variables, Flexbox/Grid, Modals, and Media Queries.
        ========================================================================= -->
   <style>
-    /* --- 1. CSS Variables & Color Palette --- */
+    /* --- 1. Core Theme Variables (Dark Mode Default) --- */
     :root {
       --bg-base: #0a0f1d;
       --bg-surface: #111827;
@@ -36,34 +36,47 @@
       --accent-amber: #f59e0b;
       --accent-red: #ef4444;
       --accent-red-bg: rgba(239, 68, 68, 0.15);
-      --accent-purple: #8b5cf6;
       
       --sidebar-width: 280px;
-      --border-radius-lg: 12px;
-      --border-radius-md: 8px;
-      --transition-speed: 0.2s;
-      /* --- Light Theme Overrides --- */
+      --header-height: 72px;
+      
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+      
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- 2. Light Theme Overrides --- */
     body.light-theme {
       --bg-base: #f8fafc;
       --bg-surface: #ffffff;
       --bg-card: #f1f5f9;
+      --bg-card-hover: #e2e8f0;
+      
       --border-color: #cbd5e1;
       --border-light: #e2e8f0;
+      
       --text-main: #0f172a;
       --text-muted: #64748b;
       --text-dark: #334155;
+      
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
-    
-    /* Ensure the sidebar header adapts nicely to light mode */
-    body.light-theme .brand-container {
-      background-color: #ffffff;
-    }
-    body.light-theme .sidebar-footer {
-      background-color: #f1f5f9;
-    }
-    }
+    body.light-theme .brand-container { background-color: #ffffff; }
+    body.light-theme .sidebar-footer { background-color: #f1f5f9; }
+    body.light-theme th { background-color: #f8fafc; color: #475569; }
+    body.light-theme .status-badge.available { border-color: rgba(16, 185, 129, 0.5); background-color: rgba(16, 185, 129, 0.1); }
+    body.light-theme .status-badge.charging { border-color: rgba(59, 130, 246, 0.5); background-color: rgba(59, 130, 246, 0.1); }
 
-    /* --- 2. Global Reset & Base Typography --- */
+    /* --- 3. Global Reset & Typography --- */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -73,15 +86,16 @@
     body {
       background-color: var(--bg-base);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       display: flex;
       min-height: 100vh;
       overflow-x: hidden;
       font-size: 14px;
       line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* --- 3. Sidebar Navigation Component --- */
+    /* --- 4. Sidebar Layout & Navigation --- */
     aside {
       width: var(--sidebar-width);
       background-color: var(--bg-surface);
@@ -89,30 +103,36 @@
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      z-index: 20;
+      z-index: 40;
+      transition: transform var(--transition-normal);
     }
 
     .brand-container {
-      padding: 24px 20px;
+      padding: 20px 24px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
       border-bottom: 1px solid var(--border-color);
-      background-color: rgba(17, 24, 39, 0.8);
+      height: var(--header-height);
+      background-color: rgba(17, 24, 39, 0.95);
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       background: linear-gradient(135deg, var(--accent-primary), var(--accent-green));
-      border-radius: var(--border-radius-md);
+      border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 20px;
       color: white;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
     .brand-text-wrapper {
@@ -121,23 +141,24 @@
     }
 
     .brand-title {
-      font-size: 19px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 800;
       letter-spacing: -0.5px;
       color: var(--text-main);
     }
 
     .brand-badge {
       font-size: 10px;
-      background: rgba(59, 130, 246, 0.2);
+      background: rgba(59, 130, 246, 0.15);
       color: #93c5fd;
-      padding: 3px 6px;
-      border-radius: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 800;
       align-self: flex-start;
-      margin-top: 2px;
+      margin-top: 4px;
       border: 1px solid rgba(59, 130, 246, 0.3);
+      letter-spacing: 0.5px;
     }
 
     nav {
@@ -145,17 +166,17 @@
       padding: 24px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       overflow-y: auto;
     }
 
     .nav-label {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
       color: var(--text-muted);
-      padding: 16px 10px 6px 10px;
+      padding: 16px 10px 8px 10px;
     }
 
     .nav-item {
@@ -165,48 +186,61 @@
       padding: 12px 16px;
       color: var(--text-muted);
       text-decoration: none;
-      border-radius: var(--border-radius-md);
+      border-radius: var(--radius-md);
+      font-weight: 600;
       font-size: 14px;
-      font-weight: 500;
-      transition: background-color var(--transition-speed), color var(--transition-speed);
       cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid transparent;
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .nav-item:hover {
       background-color: var(--bg-card);
       color: var(--text-main);
+      border-color: var(--border-color);
     }
 
     .nav-item.active {
       background-color: var(--accent-primary);
       color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
-    }
-
-    .nav-icon {
-      font-size: 18px;
-      opacity: 0.9;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      border-color: var(--accent-primary);
     }
 
     .sidebar-footer {
-      padding: 20px;
+      padding: 20px 24px;
       border-top: 1px solid var(--border-color);
       font-size: 12px;
       color: var(--text-muted);
+      background-color: rgba(0, 0, 0, 0.15);
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .sidebar-footer-item {
-      display: flex;
-      align-items: center;
       gap: 8px;
     }
 
-    /* --- 4. Main Layout & Header --- */
+    .sidebar-footer-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-footer-row svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* --- 5. Main Application Header --- */
     .app-main {
       flex: 1;
       display: flex;
@@ -214,19 +248,21 @@
       height: 100vh;
       overflow-y: auto;
       background-color: var(--bg-base);
+      position: relative;
     }
 
     header {
       background-color: var(--bg-surface);
       border-bottom: 1px solid var(--border-color);
-      padding: 16px 32px;
+      padding: 0 32px;
+      height: var(--header-height);
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
-      z-index: 10;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      z-index: 30;
+      box-shadow: var(--shadow-md);
     }
 
     .search-box {
@@ -234,16 +270,24 @@
       align-items: center;
       background-color: var(--bg-base);
       border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-md);
+      border-radius: var(--radius-md);
       padding: 10px 16px;
-      width: 420px;
+      width: 480px;
       gap: 12px;
-      transition: border-color var(--transition-speed);
+      transition: border-color var(--transition-fast);
     }
 
     .search-box:focus-within {
       border-color: var(--accent-primary);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .search-box svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: var(--text-muted);
+      stroke-width: 2;
     }
 
     .search-box input {
@@ -251,8 +295,12 @@
       border: none;
       color: var(--text-main);
       outline: none;
-      font-size: 14px;
       width: 100%;
+      font-size: 14px;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-muted);
     }
 
     .header-actions {
@@ -261,28 +309,73 @@
       gap: 24px;
     }
 
+    /* Theme Switcher Toggle */
+    .theme-switcher {
+      display: flex;
+      background: var(--bg-base);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      padding: 2px;
+    }
+
+    .theme-switcher button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-switcher button svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .theme-switcher button.active {
+      background: var(--accent-primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-switcher button:hover:not(.active) {
+      color: var(--text-main);
+    }
+
     .connection-pill {
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 8px 16px;
       border-radius: 30px;
-      transition: all var(--transition-speed);
-      border: 1px solid transparent;
+      background-color: var(--accent-green-bg);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      letter-spacing: 0.5px;
     }
 
     .pulse-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
+      background-color: var(--accent-green);
       animation: pulse 2s infinite;
+      box-shadow: 0 0 8px var(--accent-green);
     }
 
     @keyframes pulse {
       0% { transform: scale(0.95); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.5; }
+      50% { transform: scale(1.3); opacity: 0.6; }
       100% { transform: scale(0.95); opacity: 1; }
     }
 
@@ -293,19 +386,26 @@
       border-left: 1px solid var(--border-color);
       padding-left: 24px;
       cursor: pointer;
+      transition: opacity var(--transition-fast);
+    }
+
+    .user-profile:hover {
+      opacity: 0.8;
     }
 
     .user-avatar {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #4b5563, #374151);
+      background: linear-gradient(135deg, #4b5563, #1f2937);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
+      font-weight: 800;
+      font-size: 14px;
       color: white;
       border: 2px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
     }
 
     .user-details {
@@ -313,7 +413,11 @@
       flex-direction: column;
     }
 
-    /* --- 5. SPA View Controller Routing --- */
+    .user-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+    .user-role { font-size: 12px; font-weight: 500; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .user-role svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* --- 6. View Container & Routing Animations --- */
     .content-area {
       padding: 32px;
       max-width: 1600px;
@@ -325,56 +429,97 @@
       display: none;
       flex-direction: column;
       gap: 28px;
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: viewFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .view-section.active {
       display: flex;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- 6. KPI Statistics Grid --- */
+    /* --- 7. KPI Metric Cards --- */
     .kpi-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
     }
 
     .kpi-card {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-lg);
+      border-radius: var(--radius-lg);
       padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform var(--transition-speed);
+      box-shadow: var(--shadow-md);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      position: relative;
+      overflow: hidden;
     }
 
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background-color: var(--border-color);
+    }
+
+    .kpi-card.status-good::before { background-color: var(--accent-green); }
+    .kpi-card.status-warn::before { background-color: var(--accent-amber); }
+    .kpi-card.status-info::before { background-color: var(--accent-primary); }
+
     .kpi-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .kpi-title {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-muted);
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.5px;
     }
 
+    .kpi-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+    }
+    
+    .kpi-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+
     .kpi-value {
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 800;
       color: var(--text-main);
       display: flex;
       align-items: baseline;
       gap: 8px;
+      letter-spacing: -1px;
+    }
+
+    .kpi-value small {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: normal;
     }
 
     .kpi-sub {
@@ -382,19 +527,22 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-weight: 500;
+      font-weight: 600;
+      margin-top: 4px;
     }
 
-    /* --- 7. Panels, Forms & Tables --- */
+    .kpi-sub svg { width: 14px; height: 14px; stroke-width: 2.5; }
+
+    /* --- 8. Standard Panels & UI Components --- */
     .panel {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-lg);
-      padding: 24px;
+      border-radius: var(--radius-lg);
+      padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      gap: 24px;
+      box-shadow: var(--shadow-md);
     }
 
     .panel-header {
@@ -402,55 +550,56 @@
       align-items: flex-start;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 16px;
+      padding-bottom: 20px;
     }
 
     .panel-title {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 800;
       color: var(--text-main);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
+    .panel-title svg { width: 22px; height: 22px; fill: none; stroke: var(--accent-primary); stroke-width: 2; }
+
     .panel-subtitle {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-muted);
+      font-weight: 500;
     }
 
     .chart-panel-row {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 2.5fr 1fr;
       gap: 24px;
     }
 
     .chart-container {
       position: relative;
-      height: 280px;
+      height: 320px;
       width: 100%;
       padding-top: 10px;
     }
 
-    .estimator-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
+    /* Forms */
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
     }
 
     .input-field {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .input-field label {
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-dark);
     }
 
@@ -458,12 +607,13 @@
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 12px 16px;
-      border-radius: var(--border-radius-md);
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
       font-size: 14px;
       outline: none;
-      transition: border-color var(--transition-speed);
       width: 100%;
+      transition: all var(--transition-fast);
+      font-family: inherit;
     }
 
     .custom-select {
@@ -472,41 +622,53 @@
       background-repeat: no-repeat;
       background-position: right 16px top 50%;
       background-size: 12px auto;
+      cursor: pointer;
     }
 
     .custom-input:focus, .custom-select:focus {
       border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary, .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
     }
 
     .btn-primary {
       background-color: var(--accent-primary);
       color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: var(--border-radius-md);
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 14px;
-      transition: all var(--transition-speed);
-      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+      border: 1px solid var(--accent-primary);
+      box-shadow: var(--shadow-md);
     }
 
     .btn-primary:hover {
       background-color: var(--accent-primary-hover);
+      border-color: var(--accent-primary-hover);
       transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
     }
 
     .btn-outline {
       background: transparent;
       border: 1px solid var(--border-light);
       color: var(--text-main);
-      padding: 8px 16px;
-      border-radius: var(--border-radius-md);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition-speed);
     }
 
     .btn-outline:hover {
@@ -514,110 +676,141 @@
       border-color: var(--text-muted);
     }
 
-    /* --- 8. Hardware Fleet Grid & Status Badges --- */
+    .btn-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* --- 9. Hardware Fleet Grid (Live Map Dashboard) --- */
     .charger-cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      padding-top: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
     }
 
     .charger-card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: var(--border-radius-md);
-      padding: 20px;
+      border-radius: var(--radius-lg);
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      border-left: 6px solid #64748b;
-      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+      gap: 20px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      position: relative;
+      overflow: hidden;
     }
+
+    .charger-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 4px;
+      background-color: var(--border-color);
+    }
+
+    .charger-card.available::before { background-color: var(--accent-green); }
+    .charger-card.charging::before { background-color: var(--accent-primary); }
 
     .charger-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .charger-card.available { border-left-color: var(--accent-green); }
-    .charger-card.charging { border-left-color: var(--accent-primary); }
-    .charger-card.faulted { border-left-color: var(--accent-red); }
-
-    .charger-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      box-shadow: var(--shadow-lg);
     }
 
     .charger-name {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
       color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .type-badge {
+      background: var(--bg-surface);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      letter-spacing: 0.5px;
     }
 
     .charger-id {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
-      margin-top: 4px;
       font-family: monospace;
+      font-weight: 500;
     }
 
     .status-badge {
       font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
     }
 
-    .status-badge.available { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .status-badge.charging { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-    .status-badge.faulted { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-badge.available { background-color: var(--accent-green-bg); color: var(--accent-green); border-color: rgba(16, 185, 129, 0.3); }
+    .status-badge.charging { background-color: var(--accent-red-bg); color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3); }
 
-    .type-badge {
-      background: #374151;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 700;
-      color: #e5e7eb;
+    .status-badge.charging .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent-red);
+      animation: pulseLive 1.5s infinite;
     }
+    @keyframes pulseLive { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
     .charger-metrics {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: var(--bg-surface);
-      padding: 14px 16px;
-      border-radius: var(--border-radius-md);
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .metric-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
 
     .metric-group span {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .metric-group strong {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 800;
       color: var(--text-main);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
     }
 
-    /* --- 9. Data Tables --- */
+    /* --- 10. Enterprise Data Tables --- */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -626,72 +819,130 @@
     }
 
     thead th {
-      padding: 14px 16px;
+      padding: 16px 20px;
       color: var(--text-muted);
-      font-weight: 700;
+      font-weight: 800;
       border-bottom: 2px solid var(--border-color);
       font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background-color: rgba(0, 0, 0, 0.1);
+      letter-spacing: 1px;
+      background-color: rgba(0, 0, 0, 0.2);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--transition-fast);
     }
 
+    thead th:hover { background-color: rgba(0, 0, 0, 0.3); }
+
     tbody td {
-      padding: 16px;
+      padding: 18px 20px;
       border-bottom: 1px solid var(--border-color);
       vertical-align: middle;
+      color: var(--text-main);
     }
 
     tbody tr:hover td {
-      background-color: rgba(255, 255, 255, 0.02);
+      background-color: var(--bg-surface);
     }
 
-    /* --- 10. Toast Notification System --- */
-    #toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 9999;
-    }
+    tbody tr:last-child td { border-bottom: none; }
 
-    .toast {
-      background: var(--bg-card);
-      border-left: 4px solid var(--accent-primary);
-      color: white;
-      padding: 16px 20px;
-      border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    .table-pagination {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      animation: slideIn 0.3s forwards;
-      opacity: 0;
-      transform: translateX(100%);
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
-    @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+    .page-controls { display: flex; gap: 8px; }
+    .page-btn {
+      background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
+      padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+    }
+    .page-btn:hover:not(:disabled) { background: var(--border-light); }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* --- 11. Responsive Design --- */
-    @media (max-width: 1024px) {
+    /* --- 11. Modal Overlays --- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+      display: flex; justify-content: center; align-items: center; z-index: 999;
+      opacity: 0; pointer-events: none; transition: opacity var(--transition-normal);
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal-content {
+      background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+      width: 100%; max-width: 540px; box-shadow: var(--shadow-xl);
+      transform: translateY(20px); transition: transform var(--transition-normal);
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+
+    .modal-header {
+      padding: 24px 32px; border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
+    .btn-close {
+      background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+    .btn-close:hover { color: var(--accent-red); }
+
+    .modal-body { padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+    .modal-footer {
+      padding: 24px 32px; border-top: 1px solid var(--border-color); background: var(--bg-card);
+      border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg);
+      display: flex; justify-content: flex-end; gap: 12px;
+    }
+
+    /* --- 12. Toast Notification System --- */
+    #toast-container {
+      position: fixed; bottom: 32px; right: 32px; display: flex; flex-direction: column; gap: 12px; z-index: 10000;
+    }
+    .toast {
+      background: var(--bg-surface); border-left: 5px solid var(--accent-primary); color: var(--text-main);
+      padding: 16px 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+      display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 14px;
+      animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+    }
+    @keyframes slideInUp { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeOutDown { to { opacity: 0; transform: translateY(20px); } }
+
+    /* --- 13. Responsive Media Queries --- */
+    @media (max-width: 1200px) {
       .chart-panel-row { grid-template-columns: 1fr; }
-      .search-box { width: 250px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      aside { position: fixed; height: 100vh; transform: translateX(-100%); }
+      aside.open { transform: translateX(0); }
+      .search-box { width: 200px; }
+    }
+    @media (max-width: 600px) {
+      .kpi-row { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .content-area { padding: 16px; }
+      .search-box { display: none; }
     }
   </style>
 </head>
 <body>
 
   <!-- =========================================================================
-       SIDEBAR NAVIGATION (SPA ROUTING)
+       SIDEBAR NAVIGATION
        ========================================================================= -->
-  <aside>
+  <aside id="main-sidebar">
     <div class="brand-container">
-      <div class="brand-logo">⚡</div>
+      <div class="brand-logo">
+        <!-- SVG Lightning Bolt -->
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
       <div class="brand-text-wrapper">
         <div class="brand-title">ChargeTrack</div>
         <span class="brand-badge">CSMS v2.4 (Prod)</span>
@@ -701,34 +952,37 @@
     <nav>
       <div class="nav-label">Core Operations</div>
       <a class="nav-item active" data-target="view-dashboard">
-        <span class="nav-icon">📊</span> Live Operations Map
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        Live Operations Map
       </a>
       <a class="nav-item" data-target="view-stations">
-        <span class="nav-icon">🔌</span> Station Management
+        <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        Station Management
       </a>
       
       <div class="nav-label">Roaming & Billing</div>
       <a class="nav-item" data-target="view-tariffs">
-        <span class="nav-icon">🏷️</span> Tariff Engine
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Tariff Engine
       </a>
       <a class="nav-item" data-target="view-analytics">
-        <span class="nav-icon">📑</span> Expense Analytics (CDR)
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Expense Analytics (CDR)
       </a>
 
       <div class="nav-label">System Control</div>
       <a class="nav-item" data-target="view-settings">
-        <span class="nav-icon">⚙️</span> System Settings
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        System Settings
       </a>
     </nav>
 
     <div class="sidebar-footer">
-      <div class="sidebar-footer-item">
-        <span>🌍</span>
-        <strong>Region:</strong> AWS af-south-1
+      <div class="sidebar-footer-row">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <strong>Region: AWS af-south-1</strong>
       </div>
-      <div class="sidebar-footer-item" style="padding-left: 22px;">
-        Cape Town Cloud Zone
-      </div>
+      <div style="padding-left: 26px;">Cape Town Cloud Zone</div>
     </div>
   </aside>
 
@@ -737,33 +991,39 @@
        ========================================================================= -->
   <div class="app-main">
     
-    <!-- HEADER -->
+    <!-- TOP HEADER -->
     <header>
       <div class="search-box">
-        <span style="opacity: 0.7;">🔍</span>
-        <input type="text" placeholder="Search EVSE ID, Station Location, or Driver RFID..." />
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="global-search" placeholder="Search EVSE ID, Station Location, or Driver RFID..." />
       </div>
 
-      <div class="<!-- Light/Dark Mode Toggle Button -->
-<button onclick="toggleTheme()" id="themeToggleBtn" title="Switch Theme" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s;">
-  ☀️
-</button>">
-        <!-- WebSocket Connection Status -->
-        <div class="connection-pill" id="ws-status-pill">
-          <div class="pulse-dot" id="ws-dot"></div>
-          <span id="ws-status-text">CSMS Initializing...</span>
+      <div class="header-actions">
+        <!-- Explicit Light & Dark Theme Switcher -->
+        <div class="theme-switcher">
+          <button onclick="setTheme('light')" id="btn-light">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            Light
+          </button>
+          <button onclick="setTheme('dark')" id="btn-dark" class="active">
+            <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            Dark
+          </button>
         </div>
 
-        <!-- User Profile (Click to Logout) -->
-         <!-- Theme Toggle Button -->
-        <button onclick="toggleTheme()" id="themeToggleBtn" title="Switch Day/Night Theme" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s;">
-          ☀️
-        </button>
+        <div class="connection-pill" id="ws-status-pill">
+          <div class="pulse-dot" id="ws-dot"></div>
+          <span id="ws-status-text">CSMS Connecting...</span>
+        </div>
+
         <div class="user-profile" onclick="window.location.href='login.html'" title="Click to Logout">
           <div class="user-avatar">AD</div>
           <div class="user-details">
-            <span class="user-name" style="font-size: 13px; font-weight: 600;">Site Administrator</span>
-            <span class="user-role" style="font-size: 11px; color: var(--text-muted);">Logout ➔</span>
+            <span class="user-name">Site Administrator</span>
+            <span class="user-role">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </span>
           </div>
         </div>
       </div>
@@ -776,36 +1036,64 @@
            ===================================================================== -->
       <div id="view-dashboard" class="view-section active">
         
-        <!-- KPI Statistics Row -->
         <div class="kpi-row">
-          <div class="kpi-card">
-            <div class="kpi-title">Active GridCars Stations</div>
-            <div class="kpi-value" id="kpi-active-chargers">0 <span style="font-size: 16px; color: var(--text-muted);">/ 0</span></div>
-            <div class="kpi-sub" style="color: var(--accent-green);"><span>●</span> 100% Hardware Online</div>
+          <div class="kpi-card status-good">
+            <div class="kpi-header">
+              <div class="kpi-title">Active GridCars Stations</div>
+              <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            </div>
+            <div class="kpi-value" id="kpi-active-chargers">0 <small>/ 0</small></div>
+            <div class="kpi-sub" style="color: var(--accent-green);">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              100% Hardware Online
+            </div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Live Grid Demand</div>
-            <div class="kpi-value" id="kpi-total-kw">0.0 <span style="font-size: 16px; color: var(--text-muted);">kW</span></div>
-            <div class="kpi-sub" style="color: #60a5fa;"><span>📈</span> Site DLM Ceiling: 250.0 kW</div>
+          
+          <div class="kpi-card status-info">
+            <div class="kpi-header">
+              <div class="kpi-title">Live Grid Demand</div>
+              <div class="kpi-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            </div>
+            <div class="kpi-value" id="kpi-total-kw">0.0 <small>kW</small></div>
+            <div class="kpi-sub" style="color: var(--accent-primary);">
+              <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Site DLM Ceiling: 250.0 kW
+            </div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Energy Delivered Today</div>
-            <div class="kpi-value">642.8 <span style="font-size: 16px; color: var(--text-muted);">kWh</span></div>
-            <div class="kpi-sub" style="color: var(--accent-green);"><span>↑</span> +12.4% vs Yesterday</div>
+
+          <div class="kpi-card status-good">
+            <div class="kpi-header">
+              <div class="kpi-title">Energy Delivered Today</div>
+              <div class="kpi-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            </div>
+            <div class="kpi-value">642.8 <small>kWh</small></div>
+            <div class="kpi-sub" style="color: var(--accent-green);">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              +12.4% vs Yesterday
+            </div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Daily Revenue (ZAR)</div>
+
+          <div class="kpi-card status-warn">
+            <div class="kpi-header">
+              <div class="kpi-title">Daily Revenue (ZAR)</div>
+              <div class="kpi-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+            </div>
             <div class="kpi-value">R 4,821.00</div>
-            <div class="kpi-sub" style="color: var(--accent-amber);"><span>🏷️</span> Avg Tariff: R7.50 / kWh</div>
+            <div class="kpi-sub" style="color: var(--accent-amber);">
+              <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              Avg Tariff: R7.50 / kWh
+            </div>
           </div>
         </div>
 
-        <!-- Chart and Trip Range Estimator Row -->
         <div class="chart-panel-row">
           <div class="panel">
             <div class="panel-header">
               <div>
-                <h2 class="panel-title">Gauteng Grid Load Management (DLM)</h2>
+                <h2 class="panel-title">
+                  <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  Gauteng Grid Load Management (DLM)
+                </h2>
                 <span class="panel-subtitle">Real-Time Power Draw across all Active GridCars Locations vs Eskom Limits</span>
               </div>
             </div>
@@ -835,38 +1123,44 @@
                   <option value="15">Springs Mall AC (15 km away)</option>
                   <option value="52">Sandton City Hub (52 km away)</option>
                   <option value="85">Menlyn Mall Pretoria (85 km away)</option>
-                  <option value="120">OR Tambo Supercharger (120 km away)</option>
                 </select>
               </div>
-              <button class="btn-primary" onclick="calculateTripRange()">Verify Battery Reachability</button>
+              <button class="btn-primary" style="margin-top: 8px;" onclick="calculateTripRange()">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;"><polyline points="20 6 9 17 4 12"/></svg>
+                Verify Reachability
+              </button>
               
               <div class="panel" style="padding: 16px; flex-direction: row; justify-content: space-between; margin-top: 4px;" id="calc-result">
-                <span>Estimated Range: <strong>230 km</strong></span>
-                <span style="color: #34d399; font-weight: 700;">Safe Trip ✅</span>
+                <span>Range: <strong>230 km</strong></span>
+                <span style="color: var(--accent-green); font-weight: 700;">Safe Trip ✅</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Live Hardware Fleet Grid -->
         <div class="panel">
           <div class="panel-header" style="align-items: center;">
             <div>
-              <h2 class="panel-title">Gauteng GridCars Infrastructure Status</h2>
+              <h2 class="panel-title">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                Gauteng GridCars Infrastructure Status
+              </h2>
               <span class="panel-subtitle">Direct telemetry streamed over secure OCPP 2.0.1 WebSockets</span>
             </div>
-            <select id="type-filter" class="custom-select" style="width: 240px; font-weight: 600;">
-              <option value="ALL">Filter: All Available Hardware</option>
+            <select id="type-filter" class="custom-select" style="width: 260px; font-weight: 700;">
+              <option value="ALL">Filter: All Hardware Types</option>
               <option value="DC">Level 3: DC Fast Chargers Only</option>
               <option value="AC">Level 2: AC Destination Only</option>
             </select>
           </div>
-          <div class="charger-cards-grid" id="charger-cards"></div>
+          <div class="charger-cards-grid" id="charger-cards">
+            <!-- Populated via JavaScript -->
+          </div>
         </div>
       </div>
 
       <!-- =====================================================================
-           VIEW 2: STATION MANAGEMENT
+           VIEW 2: STATION MANAGEMENT (With Add Hardware Modal functionality)
            ===================================================================== -->
       <div id="view-stations" class="view-section">
         <div class="panel">
@@ -875,9 +1169,12 @@
               <h2 class="panel-title">Station Management Fleet Configuration</h2>
               <span class="panel-subtitle">Provision new EVSE hardware, manage diagnostics, and execute remote resets.</span>
             </div>
-            <button class="btn-primary" onclick="showToast('Configuration portal initializing...', 'info')">➕ Provision New EVSE</button>
+            <button class="btn-primary" onclick="openModal('provisionModal')">
+              <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Provision New EVSE
+            </button>
           </div>
-          <div style="overflow-x: auto;">
+          <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
@@ -890,7 +1187,9 @@
                   <th>Diagnostics</th>
                 </tr>
               </thead>
-              <tbody id="station-management-table"></tbody>
+              <tbody id="station-management-table">
+                <!-- Populated via JavaScript -->
+              </tbody>
             </table>
           </div>
         </div>
@@ -908,75 +1207,86 @@
             </div>
           </div>
           <div class="form-grid">
-            <div class="input-field"><label>Base AC Destination Rate (ZAR/kWh)</label><input type="number" class="custom-input" value="5.85" id="tariff-ac" /></div>
-            <div class="input-field"><label>Base DC Fast Charging Rate (ZAR/kWh)</label><input type="number" class="custom-input" value="7.35" id="tariff-dc" /></div>
-            <div class="input-field"><label>Eskom Peak Hour Multiplier (17:00 - 20:00)</label><input type="number" class="custom-input" value="1.50" /></div>
-            <div class="input-field"><label>Idle Block Fee (ZAR/minute after 15m grace)</label><input type="number" class="custom-input" value="2.00" /></div>
+            <div class="input-field">
+              <label>Base AC Destination Rate (ZAR/kWh)</label>
+              <input type="number" class="custom-input" value="5.85" id="tariff-ac" step="0.01" />
+            </div>
+            <div class="input-field">
+              <label>Base DC Fast Charging Rate (ZAR/kWh)</label>
+              <input type="number" class="custom-input" value="7.35" id="tariff-dc" step="0.01" />
+            </div>
+            <div class="input-field">
+              <label>Eskom Peak Hour Multiplier (17:00 - 20:00)</label>
+              <input type="number" class="custom-input" value="1.50" step="0.1" />
+            </div>
+            <div class="input-field">
+              <label>Idle Block Fee (ZAR/minute after 15m grace)</label>
+              <input type="number" class="custom-input" value="2.00" step="0.5" />
+            </div>
           </div>
           <div style="border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 12px;">
-            <button class="btn-primary" onclick="simulateTariffUpdate()">Deploy Updated Network Tariffs</button>
+            <button class="btn-primary" onclick="simulateTariffUpdate()">
+              <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2;"><path d="M21.5 2v6h-6M2.13 15.57a9 9 0 1 0 3.84-10.36l5.33-5.33"/></svg>
+              Deploy Updated Network Tariffs
+            </button>
           </div>
         </div>
       </div>
 
       <!-- =====================================================================
-           VIEW 4: EXPENSE ANALYTICS & CDRS
+           VIEW 4: EXPENSE ANALYTICS & CDRs (With Table Sorting & Export)
            ===================================================================== -->
       <div id="view-analytics" class="view-section">
         <div class="panel">
-          <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
+          <div class="panel-header">
             <div>
               <h2 class="panel-title">Charging Session Logger & Expense Analytics</h2>
               <span class="panel-subtitle">Verified Charge Detail Records (CDRs) archived for POPIA & Tax Compliance</span>
             </div>
-            <div style="display: flex; gap: 12px;">
-              <button class="btn-outline" onclick="showToast('Exporting CDRs to CSV format...', 'success')">📥 Export CSV</button>
-              <button class="btn-outline" onclick="showToast('Generating official compliance PDF...', 'info')">📄 Generate PDF</button>
+            <div class="btn-group">
+              <button class="btn-outline btn-icon" onclick="exportTableToCSV('cdr-table', 'ChargeTrack_CDRs.csv')">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+              <button class="btn-outline btn-icon" onclick="showToast('Generating official compliance PDF...', 'info')">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Generate PDF
+              </button>
             </div>
           </div>
-          <div style="overflow-x: auto; margin-top: 20px;">
-            <table>
+          <div class="table-wrapper">
+            <table id="cdr-table">
               <thead>
                 <tr>
-                  <th>Session ID</th>
-                  <th>Station Config</th>
-                  <th>Driver RFID Hash</th>
-                  <th>Energy</th>
-                  <th>Duration</th>
-                  <th>Total Cost (ZAR)</th>
+                  <th onclick="sortTable(0, 'cdr-table')">Session ID ↕</th>
+                  <th onclick="sortTable(1, 'cdr-table')">Station Config ↕</th>
+                  <th onclick="sortTable(2, 'cdr-table')">Driver RFID Hash ↕</th>
+                  <th onclick="sortTable(3, 'cdr-table')">Energy (kWh) ↕</th>
+                  <th onclick="sortTable(4, 'cdr-table')">Duration ↕</th>
+                  <th onclick="sortTable(5, 'cdr-table')">Total Cost (ZAR) ↕</th>
                   <th>Settlement Status</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td style="font-family: monospace; font-weight: 700; color: #93c5fd;">#CDR-2026-9081</td>
-                  <td><strong>Sandton City Hub</strong><br><span style="font-size: 12px; color: var(--text-muted);">DC CCS2 Fast</span></td>
-                  <td>TAG_***9921</td>
-                  <td><strong>28.4 kWh</strong></td>
-                  <td>34 mins</td>
-                  <td style="font-weight: 800; font-size: 15px;">R 213.00</td>
-                  <td><span style="background: rgba(59,130,246,0.15); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Charging Live</span></td>
-                </tr>
-                <tr>
-                  <td style="font-family: monospace; font-weight: 700; color: #93c5fd;">#CDR-2026-9080</td>
-                  <td><strong>OR Tambo Int. Airport</strong><br><span style="font-size: 12px; color: var(--text-muted);">DC CCS2 Fast</span></td>
-                  <td>TAG_***4402</td>
-                  <td><strong>42.1 kWh</strong></td>
-                  <td>48 mins</td>
-                  <td style="font-weight: 800; font-size: 15px;">R 315.75</td>
-                  <td><span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Settled (POPIA)</span></td>
-                </tr>
-                <tr>
-                  <td style="font-family: monospace; font-weight: 700; color: #93c5fd;">#CDR-2026-9079</td>
-                  <td><strong>Springs Mall AC</strong><br><span style="font-size: 12px; color: var(--text-muted);">Type 2 Cable</span></td>
-                  <td>TAG_***8819</td>
-                  <td><strong>14.8 kWh</strong></td>
-                  <td>2h 22m</td>
-                  <td style="font-weight: 800; font-size: 15px;">R 111.00</td>
-                  <td><span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Settled (POPIA)</span></td>
-                </tr>
+              <tbody id="cdr-table-body">
+                <!-- Generating dummy data for visual robustness -->
+                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9081</td><td><strong>Sandton City Hub</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***9921</td><td><strong>28.4</strong></td><td>34 mins</td><td style="font-weight: 800; font-size: 15px;">R 213.00</td><td><span class="status-badge charging"><div class="live-dot"></div>Charging Live</span></td></tr>
+                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9080</td><td><strong>OR Tambo Airport</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***4402</td><td><strong>42.1</strong></td><td>48 mins</td><td style="font-weight: 800; font-size: 15px;">R 315.75</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
+                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9079</td><td><strong>Springs Mall AC</strong><br><span style="font-size: 11px; color: var(--text-muted);">Type 2 Cable</span></td><td>TAG_***8819</td><td><strong>14.8</strong></td><td>2h 22m</td><td style="font-weight: 800; font-size: 15px;">R 111.00</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
+                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9078</td><td><strong>Menlyn Mall</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***7712</td><td><strong>55.2</strong></td><td>55 mins</td><td style="font-weight: 800; font-size: 15px;">R 414.00</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
+                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9077</td><td><strong>Mall of Africa</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***3398</td><td><strong>18.5</strong></td><td>21 mins</td><td style="font-weight: 800; font-size: 15px;">R 138.75</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
               </tbody>
             </table>
+            <!-- Pagination Controls -->
+            <div class="table-pagination">
+              <span>Showing 1 to 5 of 124 entries</span>
+              <div class="page-controls">
+                <button class="page-btn" disabled>Previous</button>
+                <button class="page-btn" style="background: var(--accent-primary); color: white; border-color: var(--accent-primary);">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">Next</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -987,16 +1297,34 @@
       <div id="view-settings" class="view-section">
         <div class="panel">
           <div class="panel-header">
-            <div><h2 class="panel-title">Core System Configuration</h2><span class="panel-subtitle">Global CSMS parameters and AWS integration rules</span></div>
+            <div>
+              <h2 class="panel-title">Core System Configuration</h2>
+              <span class="panel-subtitle">Global CSMS parameters and AWS integration rules</span>
+            </div>
           </div>
           <div class="form-grid">
-            <div class="input-field"><label>AWS Hosting Region</label><input type="text" class="custom-input" value="af-south-1 (Cape Town)" disabled style="opacity: 0.6;" /></div>
-            <div class="input-field"><label>Max Global Grid Capacity Limit (kW)</label><input type="number" class="custom-input" value="250" /></div>
-            <div class="input-field"><label>OCPP Heartbeat Interval (Seconds)</label><input type="number" class="custom-input" value="60" /></div>
-            <div class="input-field"><label>Admin Dashboard Refresh Rate (ms)</label><input type="number" class="custom-input" value="3000" /></div>
+            <div class="input-field">
+              <label>AWS Hosting Region (Immutable)</label>
+              <input type="text" class="custom-input" value="af-south-1 (Cape Town)" disabled style="opacity: 0.6; cursor: not-allowed;" />
+            </div>
+            <div class="input-field">
+              <label>Max Global Grid Capacity Limit (kW)</label>
+              <input type="number" class="custom-input" value="250" />
+            </div>
+            <div class="input-field">
+              <label>OCPP Heartbeat Interval (Seconds)</label>
+              <input type="number" class="custom-input" value="60" />
+            </div>
+            <div class="input-field">
+              <label>Admin Dashboard Refresh Rate (ms)</label>
+              <input type="number" class="custom-input" value="3000" />
+            </div>
           </div>
           <div style="border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 12px;">
-            <button class="btn-primary" onclick="showToast('Global settings synchronized.', 'success')">Save Configuration</button>
+            <button class="btn-primary btn-icon" onclick="showToast('Global settings synchronized with AWS database.', 'success')">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Configuration
+            </button>
           </div>
         </div>
       </div>
@@ -1004,61 +1332,163 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       MODAL OVERLAYS
+       ========================================================================= -->
+  <div class="modal-overlay" id="provisionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Provision New EVSE</h3>
+        <button class="btn-close" onclick="closeModal('provisionModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-field">
+          <label>OCPP Charge Point ID</label>
+          <input type="text" class="custom-input" placeholder="e.g. GC-NW-01" />
+        </div>
+        <div class="input-field">
+          <label>Hardware Type</label>
+          <select class="custom-select">
+            <option>DC Fast (Level 3)</option>
+            <option>AC Destination (Level 2)</option>
+          </select>
+        </div>
+        <div class="input-field">
+          <label>Connection Endpoint URI</label>
+          <input type="text" class="custom-input" value="wss://csms.chargetrack.co.za/ocpp/" disabled style="opacity: 0.7;" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="closeModal('provisionModal')">Cancel</button>
+        <button class="btn-primary" onclick="submitProvisioning()">Authorize Hardware</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
   <!-- =========================================================================
        JAVASCRIPT APPLICATION LOGIC
+       Handles SPA Routing, Theme State, WebSockets, Chart.js, CSV Exports, 
+       Table Sorting, and Modal controls.
        ========================================================================= -->
   <script>
     /**
-     * 1. SPA ROUTER LOGIC
+     * @function setTheme
+     * @description Explicitly forces the UI into Light or Dark mode. Bypasses classList.toggle bugs.
+     * @param {string} mode - 'light' or 'dark'
+     */
+    function setTheme(mode) {
+      const body = document.body;
+      const btnLight = document.getElementById('btn-light');
+      const btnDark = document.getElementById('btn-dark');
+      
+      if (mode === 'light') {
+        body.classList.add('light-theme');
+        if (btnLight) btnLight.classList.add('active');
+        if (btnDark) btnDark.classList.remove('active');
+        localStorage.setItem('chargetrack_theme', 'light');
+      } else {
+        body.classList.remove('light-theme');
+        if (btnDark) btnDark.classList.add('active');
+        if (btnLight) btnLight.classList.remove('active');
+        localStorage.setItem('chargetrack_theme', 'dark');
+      }
+    }
+
+    // Apply saved theme preference on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('chargetrack_theme') || 'dark';
+      setTheme(savedTheme);
+    });
+
+    /**
+     * @description Single Page Application (SPA) Router logic
+     * Attaches click listeners to sidebar nav items to transition views securely.
      */
     document.querySelectorAll('.nav-item').forEach(link => {
       link.addEventListener('click', (e) => {
+        // Reset active sidebar styling
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
         e.currentTarget.classList.add('active');
+        
+        // Hide all views and reveal target
         const targetId = e.currentTarget.getAttribute('data-target');
         document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
         document.getElementById(targetId).classList.add('active');
-        if(targetId === 'view-dashboard') dlmChart.update();
+        
+        // Trigger specific chart reflows if returning to dashboard
+        if(targetId === 'view-dashboard' && typeof dlmChart !== 'undefined') dlmChart.update();
       });
     });
 
     /**
-     * 2. TOAST NOTIFICATION ENGINE
+     * @function showToast
+     * @description Generates a customized DOM notification that auto-destroys.
+     * @param {string} message - Notification text
+     * @param {string} type - 'info', 'success', or 'error'
      */
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = 'toast';
-      let icon = 'ℹ️'; let borderCol = 'var(--accent-primary)';
-      if(type === 'success') { icon = '✅'; borderCol = 'var(--accent-green)'; }
-      if(type === 'error') { icon = '⚠️'; borderCol = 'var(--accent-red)'; }
+      
+      let borderCol = 'var(--accent-primary)';
+      let icon = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+      
+      if(type === 'success') { 
+        borderCol = 'var(--accent-green)'; 
+        icon = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+      }
+      if(type === 'error') { 
+        borderCol = 'var(--accent-red)'; 
+        icon = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      }
+      
       toast.style.borderLeftColor = borderCol;
-      toast.innerHTML = `<span style="font-size:18px;">${icon}</span> <span>${message}</span>`;
+      toast.innerHTML = `<span style="color:${borderCol}; display:flex;">${icon}</span> <span>${message}</span>`;
       container.appendChild(toast);
+      
       setTimeout(() => {
-        toast.style.animation = 'fadeOut 0.3s forwards';
+        toast.style.animation = 'fadeOutDown 0.3s forwards';
         setTimeout(() => toast.remove(), 300);
       }, 3500);
     }
 
     /**
-     * 3. DLM CHART INITIALIZATION
+     * @description Chart.js Instantiation for the DLM Graph
      */
     const chartCtx = document.getElementById('dlmChart').getContext('2d');
+    
+    // Create gradient fill for the live draw line
+    const gradientFill = chartCtx.createLinearGradient(0, 0, 0, 300);
+    gradientFill.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+    gradientFill.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+
     const dlmChart = new Chart(chartCtx, {
       type: 'line',
       data: {
         labels: ['0s','3s','6s','9s','12s','15s','18s'],
         datasets: [
-          { label: 'Grid Threshold (250kW Limit)', data: [250,250,250,250,250,250,250], borderColor: '#ef4444', borderWidth: 2, borderDash: [6,6], fill: false, pointRadius: 0 },
-          { label: 'Aggregated Live Network Draw (kW)', data: [120,125,122,130,128,135,133], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderWidth: 2.5, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#60a5fa' }
+          { 
+            label: 'Grid Threshold (250kW Limit)', 
+            data: [250,250,250,250,250,250,250], 
+            borderColor: '#ef4444', borderWidth: 2, borderDash: [6,6], fill: false, pointRadius: 0 
+          },
+          { 
+            label: 'Aggregated Live Network Draw (kW)', 
+            data: [120,125,122,130,128,135,133], 
+            borderColor: '#3b82f6', backgroundColor: gradientFill, borderWidth: 2.5, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#60a5fa' 
+          }
         ]
       },
       options: { 
         responsive: true, maintainAspectRatio: false, 
-        plugins: { legend: { labels: { color: '#9ca3af', font: {size: 12} } } }, 
+        plugins: { 
+          legend: { labels: { color: '#9ca3af', font: {size: 12, family: '-apple-system'} } },
+          tooltip: { backgroundColor: 'rgba(17,24,39,0.9)', titleFont: {size:13}, bodyFont: {size:14, weight:'bold'}, padding: 12, borderColor: '#374151', borderWidth: 1 }
+        }, 
         scales: { 
           x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }, 
           y: { min: 0, max: 300, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', callback: val => val + ' kW' } } 
@@ -1067,7 +1497,8 @@
     });
 
     /**
-     * 4. WEBSOCKET & RENDER ENGINE
+     * @description WEBSOCKET ENGINE & HARDWARE LOGIC
+     * Includes full 11-station GridCars array for robust frontend demonstration.
      */
     let latestChargerData = [];
     const extendedGridCarsData = [
@@ -1092,8 +1523,9 @@
         socket.onopen = () => {
           document.getElementById('ws-status-text').innerText = 'CSMS Online (Active)';
           const pill = document.getElementById('ws-status-pill');
-          pill.style.background = 'rgba(16,185,129,0.15)'; pill.style.color = '#34d399'; pill.style.borderColor = 'rgba(16,185,129,0.4)';
-          document.getElementById('ws-dot').style.background = '#34d399';
+          pill.style.background = 'var(--accent-green-bg)'; pill.style.color = 'var(--accent-green)'; pill.style.border = '1px solid rgba(16,185,129,0.3)';
+          document.getElementById('ws-dot').style.background = 'var(--accent-green)';
+          document.getElementById('ws-dot').style.boxShadow = '0 0 8px var(--accent-green)';
         };
 
         socket.onmessage = (e) => {
@@ -1112,8 +1544,9 @@
     function enableOfflineMock() {
       document.getElementById('ws-status-text').innerText = 'Offline: Presentation Mode';
       const pill = document.getElementById('ws-status-pill');
-      pill.style.background = 'rgba(239,68,68,0.15)'; pill.style.color = '#f87171'; pill.style.borderColor = 'rgba(239,68,68,0.4)';
-      document.getElementById('ws-dot').style.background = '#f87171';
+      pill.style.background = 'var(--accent-red-bg)'; pill.style.color = 'var(--accent-red)'; pill.style.border = '1px solid rgba(239,68,68,0.3)';
+      document.getElementById('ws-dot').style.background = 'var(--accent-red)';
+      document.getElementById('ws-dot').style.boxShadow = '0 0 8px var(--accent-red)';
       if(latestChargerData.length === 0) { 
         latestChargerData = extendedGridCarsData; 
         executeRenderCycle(); 
@@ -1122,18 +1555,24 @@
 
     document.getElementById('type-filter').addEventListener('change', executeRenderCycle);
 
+    /**
+     * @function executeRenderCycle
+     * @description Core UI Render loop. Calculates KPIs, updates the chart, builds the Grid, and populates Tables.
+     */
     function executeRenderCycle() {
       if (!latestChargerData.length) return;
 
+      // 1. Calculate KPIs (Always full dataset)
       let totalKw = 0, activeCount = 0;
       latestChargerData.forEach(c => { 
         totalKw += Number(c.currentKw || 0); 
         if (c.status === 'Charging') activeCount++; 
       });
       
-      document.getElementById('kpi-total-kw').innerHTML = `${totalKw.toFixed(1)} <span style="font-size: 16px; color: var(--text-muted);">kW</span>`;
-      document.getElementById('kpi-active-chargers').innerHTML = `${activeCount} <span style="font-size: 16px; color: var(--text-muted);">/ ${latestChargerData.length}</span>`;
+      document.getElementById('kpi-total-kw').innerHTML = `${totalKw.toFixed(1)} <small>kW</small>`;
+      document.getElementById('kpi-active-chargers').innerHTML = `${activeCount} <small>/ ${latestChargerData.length}</small>`;
 
+      // 2. Update DLM Chart
       const timeStr = new Date().toLocaleTimeString('en-US', {hour12: false});
       if (dlmChart.data.labels.length > 7) { 
         dlmChart.data.labels.shift(); 
@@ -1143,6 +1582,7 @@
       dlmChart.data.datasets[1].data.push(totalKw); 
       dlmChart.update();
 
+      // 3. Filter Hardware for the Dashboard Grid
       const currentFilter = document.getElementById('type-filter').value;
       const filteredData = latestChargerData.filter(c => currentFilter === 'ALL' || c.type === currentFilter);
 
@@ -1154,22 +1594,35 @@
           <div class="charger-card ${statusClass}">
             <div class="charger-card-top">
               <div>
-                <div class="charger-name">${c.name} <span class="type-badge">${c.type}</span></div>
+                <div class="charger-name">
+                  ${c.name} 
+                  <span class="type-badge">${c.type}</span>
+                </div>
                 <div class="charger-id">OCPP ID: ${c.id}</div>
               </div>
-              <span class="status-badge ${statusClass}">${c.status}</span>
+              <span class="status-badge ${statusClass}">
+                ${isCharging ? '<div class="live-dot"></div>' : ''} ${c.status}
+              </span>
             </div>
             <div class="charger-metrics">
-              <div class="metric-group"><span>Live Power Output</span><strong>${c.currentKw.toFixed(1)} kW</strong></div>
-              <div class="metric-group" style="text-align:right;"><span>Connector</span><strong style="font-size:14px;">${plugIcon}</strong></div>
+              <div class="metric-group">
+                <span>Live Power Output</span>
+                <strong>${c.currentKw.toFixed(1)} <small style="font-size:16px; font-weight:600; color:var(--text-muted); margin-left:4px;">kW</small></strong>
+              </div>
+              <div class="metric-group" style="text-align: right;">
+                <span>Connector Type</span>
+                <strong style="font-size: 14px;">${plugIcon}</strong>
+              </div>
             </div>
           </div>
         `;
       }).join('');
 
+      // 4. Populate the Station Management Table in View 2
       document.getElementById('station-management-table').innerHTML = latestChargerData.map(c => {
-        const statCol = c.status === 'Charging' ? '#60a5fa' : '#34d399';
-        const statBg = c.status === 'Charging' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)';
+        const isC = c.status === 'Charging';
+        const statCol = isC ? 'var(--accent-primary)' : 'var(--accent-green)';
+        const statBg = isC ? 'var(--accent-primary-bg)' : 'var(--accent-green-bg)';
         return `
           <tr>
             <td style="font-family:monospace; font-weight:700;">${c.id}</td>
@@ -1177,15 +1630,111 @@
             <td>Hardware Array ${c.type}</td>
             <td style="color:var(--text-muted);">${c.firmware}</td>
             <td style="font-family:monospace; color:var(--text-muted);">${c.ip}</td>
-            <td><span style="padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase; color:${statCol}; background:${statBg}; border:1px solid ${statCol}50;">${c.status}</span></td>
-            <td><button class="btn-outline" onclick="triggerRemoteReboot('${c.id}')" style="padding:6px 12px;">Remote Reboot</button></td>
+            <td><span class="status-badge ${isC ? 'charging' : 'available'}">${c.status}</span></td>
+            <td>
+              <button class="btn-outline" onclick="triggerRemoteReboot('${c.id}')" style="padding:6px 12px; font-size:12px;">
+                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; margin-right:4px;"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+                Reboot
+              </button>
+            </td>
           </tr>
         `;
       }).join('');
     }
 
+    /**
+     * @function exportTableToCSV
+     * @description Generates a formatted CSV file from the HTML table data and prompts browser download.
+     */
+    function exportTableToCSV(tableId, filename) {
+      const table = document.getElementById(tableId);
+      let csv = [];
+      for (let i = 0; i < table.rows.length; i++) {
+        let row = [], cols = table.rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+          // Clean text content to avoid formatting breaks
+          let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/(\s\s)/gm, " ");
+          row.push('"' + data + '"');
+        }
+        csv.push(row.join(','));
+      }
+      downloadCSV(csv.join('\n'), filename);
+    }
+
+    function downloadCSV(csv, filename) {
+      let csvFile;
+      let downloadLink;
+      csvFile = new Blob([csv], {type: "text/csv"});
+      downloadLink = document.createElement("a");
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      showToast('CSV Export generated successfully.', 'success');
+    }
+
+    /**
+     * @function sortTable
+     * @description Allows administrators to click column headers to alphabetically/numerically sort rows.
+     */
+    function sortTable(n, tableId) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById(tableId);
+      switching = true;
+      dir = "asc"; 
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              shouldSwitch = true; break;
+            }
+          } else if (dir == "desc") {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              shouldSwitch = true; break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount ++;      
+        } else {
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+    }
+
+    /**
+     * @description Modal Overlay Controllers
+     */
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function submitProvisioning() {
+      closeModal('provisionModal');
+      showToast('New EVSE hardware authorized and provisioned successfully.', 'success');
+    }
+
+    /**
+     * @description Simulated Application Logic Endpoints
+     */
     function triggerRemoteReboot(evseId) {
-      showToast(`Sending OCPP Reset.Req to ${evseId}...`, 'info');
+      showToast(`Sending OCPP Reset.Req command to ${evseId}...`, 'info');
       setTimeout(() => showToast(`Hardware ${evseId} successfully rebooted.`, 'success'), 2000);
     }
 
@@ -1206,57 +1755,17 @@
       const resultUI = document.getElementById('calc-result');
       
       if (estRange >= tripDist + 15) {
-        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: #34d399; font-weight: 700; background: rgba(16,185,129,0.15); padding: 4px 10px; border-radius: 4px;">Safe Trip ✅</span>`;
+        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: var(--accent-green); font-weight: 700; background: var(--accent-green-bg); padding: 4px 10px; border-radius: 4px;">Safe Trip ✅</span>`;
+        resultUI.style.borderColor = 'rgba(16,185,129,0.4)';
       } else {
-        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: #f87171; font-weight: 700; background: rgba(239,68,68,0.15); padding: 4px 10px; border-radius: 4px;">Warning: Low Range ⚠️</span>`;
+        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: var(--accent-red); font-weight: 700; background: var(--accent-red-bg); padding: 4px 10px; border-radius: 4px;">Warning: Low Range ⚠️</span>`;
+        resultUI.style.borderColor = 'rgba(239,68,68,0.4)';
       }
     }
 
+    // Execute Startup connection
     connectWebSocket();
-  </script>
-<script>
-    function toggleTheme() {
-      document.body.classList.toggle('light-theme');
-      const isLight = document.body.classList.contains('light-theme');
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) btn.innerText = isLight ? '🌙' : '☀️';
-      localStorage.setItem('chargetrack_theme', isLight ? 'light' : 'dark');
-    }
 
-    // Remember user theme preference on page load
-    if (localStorage.getItem('chargetrack_theme') === 'light') {
-      document.body.classList.add('light-theme');
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) btn.innerText = '🌙';
-    }function toggleTheme() {
-      const body = document.body;
-      const btn = document.getElementById('themeToggleBtn');
-      
-      // Check if it is currently light mode
-      if (body.classList.contains('light-theme')) {
-        // Force it back to Dark Mode
-        body.classList.remove('light-theme');
-        if (btn) btn.innerText = '☀️';
-        localStorage.setItem('chargetrack_theme', 'dark');
-      } else {
-        // Force it to Light Mode
-        body.classList.add('light-theme');
-        if (btn) btn.innerText = '🌙';
-        localStorage.setItem('chargetrack_theme', 'light');
-      }
-    }
-
-    // Apply the saved theme when the page loads
-    window.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('chargetrack_theme') === 'light') {
-        document.body.classList.add('light-theme');
-        const btn = document.getElementById('themeToggleBtn');
-        if (btn) btn.innerText = '🌙';
-      }
-    });
-    
   </script>
-</body>
-</html>
 </body>
 </html>
