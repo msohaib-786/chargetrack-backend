@@ -9,6 +9,9 @@
   
   <!-- Chart.js for Dynamic Load Management (DLM) Visualizer -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jsPDF for PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
   <!-- =========================================================================
        ENTERPRISE STYLESHEET (CSS)
@@ -1250,7 +1253,7 @@
               </button>
               <button class="btn-outline btn-icon" onclick="showToast('Generating official compliance PDF...', 'info')">
                 <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                Generate PDF
+                <button class="btn-outline btn-icon" onclick="generatePDF()">
               </button>
             </div>
           </div>
@@ -1279,14 +1282,15 @@
             <!-- Pagination Controls -->
             <div class="table-pagination">
               <span>Showing 1 to 5 of 124 entries</span>
-              <div class="page-controls">
-                <button class="page-btn" disabled>Previous</button>
-                <button class="page-btn" style="background: var(--accent-primary); color: white; border-color: var(--accent-primary);">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">Next</button>
-              </div>
-            </div>
+              <!-- Interactive Pagination Controls -->
+         <div class="table-pagination">
+           <span id="pagination-info">Showing 1 to 5 of 12 entries</span>
+           <div class="page-controls">
+             <button class="page-btn" id="btn-prev" onclick="changePage(-1)">Previous</button>
+             <button class="page-btn" id="page-num" style="background: var(--accent-primary); color: white; border-color: var(--accent-primary);">1</button>
+             <button class="page-btn" id="btn-next" onclick="changePage(1)">Next</button>
+           </div>
+         </div>
           </div>
         </div>
       </div>
@@ -1765,7 +1769,96 @@
 
     // Execute Startup connection
     connectWebSocket();
+/**
+     * @description DYNAMIC PAGINATION & MOCK DATABASE
+     */
+    const mockCDRData = [
+      { id: "#CDR-2026-9081", station: "Sandton City Hub", type: "DC CCS2 Fast", rfid: "TAG_***9921", kwh: 28.4, time: "34 mins", cost: 213.00, status: "Charging Live", statusClass: "charging" },
+      { id: "#CDR-2026-9080", station: "OR Tambo Airport", type: "DC CCS2 Fast", rfid: "TAG_***4402", kwh: 42.1, time: "48 mins", cost: 315.75, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9079", station: "Springs Mall AC", type: "Type 2 Cable", rfid: "TAG_***8819", kwh: 14.8, time: "2h 22m", cost: 111.00, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9078", station: "Menlyn Mall", type: "DC CCS2 Fast", rfid: "TAG_***7712", kwh: 55.2, time: "55 mins", cost: 414.00, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9077", station: "Mall of Africa", type: "DC CCS2 Fast", rfid: "TAG_***3398", kwh: 18.5, time: "21 mins", cost: 138.75, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9076", station: "Melrose Arch", type: "Type 2 Cable", rfid: "TAG_***1122", kwh: 22.0, time: "3h 10m", cost: 165.00, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9075", station: "Fourways Mall", type: "Type 2 Cable", rfid: "TAG_***4455", kwh: 9.4, time: "1h 05m", cost: 70.50, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9074", station: "Irene Link Centurion", type: "DC CCS2 Fast", rfid: "TAG_***9988", kwh: 33.1, time: "40 mins", cost: 248.25, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9073", station: "East Rand Mall", type: "Type 2 Cable", rfid: "TAG_***7766", kwh: 11.2, time: "1h 45m", cost: 84.00, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9072", station: "Sandton City Hub", type: "DC CCS2 Fast", rfid: "TAG_***3344", kwh: 60.5, time: "1h 02m", cost: 453.75, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9071", station: "Mall of Africa", type: "DC CCS2 Fast", rfid: "TAG_***2211", kwh: 15.0, time: "18 mins", cost: 112.50, status: "Settled (POPIA)", statusClass: "available" },
+      { id: "#CDR-2026-9070", station: "Springs Mall AC", type: "Type 2 Cable", rfid: "TAG_***5566", kwh: 30.0, time: "4h 15m", cost: 225.00, status: "Settled (POPIA)", statusClass: "available" }
+    ];
 
+    let currentPage = 1;
+    const rowsPerPage = 5;
+
+    function renderTablePage(page) {
+      const startIndex = (page - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
+      const paginatedItems = mockCDRData.slice(startIndex, endIndex);
+      
+      const tbody = document.getElementById('cdr-table-body');
+      tbody.innerHTML = paginatedItems.map(row => `
+        <tr>
+          <td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">${row.id}</td>
+          <td><strong>${row.station}</strong><br><span style="font-size: 11px; color: var(--text-muted);">${row.type}</span></td>
+          <td>${row.rfid}</td>
+          <td><strong>${row.kwh.toFixed(1)}</strong></td>
+          <td>${row.time}</td>
+          <td style="font-weight: 800; font-size: 15px;">R ${row.cost.toFixed(2)}</td>
+          <td><span class="status-badge ${row.statusClass}">${row.status === 'Charging Live' ? '<div class="live-dot"></div>' : ''}${row.status}</span></td>
+        </tr>
+      `).join('');
+
+      document.getElementById('pagination-info').innerText = `Showing ${startIndex + 1} to ${Math.min(endIndex, mockCDRData.length)} of ${mockCDRData.length} entries`;
+      document.getElementById('page-num').innerText = page;
+      
+      document.getElementById('btn-prev').disabled = page === 1;
+      document.getElementById('btn-next').disabled = endIndex >= mockCDRData.length;
+    }
+
+    function changePage(direction) {
+      currentPage += direction;
+      renderTablePage(currentPage);
+    }
+
+    // Initialize pagination on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTablePage(currentPage);
+    });
+
+    /**
+     * @description PDF GENERATION ENGINE
+     */
+    function generatePDF() {
+      showToast('Generating official compliance PDF...', 'info');
+      
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Landscape for wide tables
+        
+        // Add header
+        doc.setFontSize(18);
+        doc.text("ChargeTrack CSMS - Official Charge Detail Records (CDRs)", 14, 20);
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text("Generated on: " + new Date().toLocaleString(), 14, 28);
+        
+        // Parse the HTML table using autoTable plugin
+        doc.autoTable({ 
+          html: '#cdr-table', 
+          startY: 35,
+          theme: 'grid',
+          headStyles: { fillColor: [59, 130, 246] }, // ChargeTrack Blue
+          styles: { fontSize: 10 }
+        });
+        
+        // Save the PDF
+        doc.save('ChargeTrack_Expense_Analytics.pdf');
+        showToast('PDF Export generated successfully.', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Error generating PDF. Check console logs.', 'error');
+      }
+    }
   </script>
 </body>
 </html>
