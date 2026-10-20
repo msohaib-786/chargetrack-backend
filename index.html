@@ -725,7 +725,10 @@
         <input type="text" placeholder="Search EVSE ID, Station Location, or Driver RFID..." />
       </div>
 
-      <div class="header-actions">
+      <div class="<!-- Light/Dark Mode Toggle Button -->
+<button onclick="toggleTheme()" id="themeToggleBtn" title="Switch Theme" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s;">
+  ☀️
+</button>">
         <!-- WebSocket Connection Status -->
         <div class="connection-pill" id="ws-status-pill">
           <div class="pulse-dot" id="ws-dot"></div>
@@ -1188,5 +1191,18 @@
 
     connectWebSocket();
   </script>
+  function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('themeToggleBtn').innerText = isLight ? '🌙' : '☀️';
+      localStorage.setItem('chargetrack_theme', isLight ? 'light' : 'dark');
+    }
+
+    // Remember user theme preference on page load
+    if (localStorage.getItem('chargetrack_theme') === 'light') {
+      document.body.classList.add('light-theme');
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.innerText = '🌙';
+    }
 </body>
 </html>
