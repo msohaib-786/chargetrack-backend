@@ -3,38 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ChargeTrack CSMS - Enterprise Central Operations Platform" />
+  <meta name="description" content="ChargeTrack CSMS - Enterprise Central Operations Platform for EV Infrastructure Management" />
   <meta name="author" content="ChargeTrack Systems Engineering" />
   <title>ChargeTrack CSMS - Central Operations Platform</title>
   
+  <!-- =========================================================================
+       EXTERNAL LIBRARIES
+       ========================================================================= -->
   <!-- Chart.js for Dynamic Load Management (DLM) Visualizer -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- jsPDF Libraries for PDF Export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-  <!-- jsPDF for PDF Generation -->
+  <!-- jsPDF for PDF Generation & Compliance Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
   <!-- =========================================================================
        ENTERPRISE STYLESHEET (CSS)
-       Modular design system with CSS Variables, Flexbox/Grid, Modals, and Media Queries.
+       Modular design system with CSS Variables, Flexbox/Grid, Modals, 
+       and Media Queries. Formatted explicitly for academic review.
        ========================================================================= -->
   <style>
     /* --- 1. Core Theme Variables (Dark Mode Default) --- */
     :root {
+      /* Background Colors */
       --bg-base: #0a0f1d;
       --bg-surface: #111827;
       --bg-card: #1f2937;
       --bg-card-hover: #283548;
       
+      /* Border Colors */
       --border-color: #374151;
       --border-light: #4b5563;
       
+      /* Text Colors */
       --text-main: #f9fafb;
       --text-muted: #9ca3af;
       --text-dark: #d1d5db;
       
+      /* Brand & Accent Colors */
       --accent-primary: #3b82f6;
       --accent-primary-hover: #2563eb;
       --accent-green: #10b981;
@@ -43,17 +48,21 @@
       --accent-red: #ef4444;
       --accent-red-bg: rgba(239, 68, 68, 0.15);
       
+      /* Layout Dimensions */
       --sidebar-width: 280px;
       --header-height: 72px;
       
+      /* Border Radii */
       --radius-sm: 6px;
       --radius-md: 8px;
       --radius-lg: 12px;
       --radius-xl: 16px;
       
+      /* Animation Timing */
       --transition-fast: 0.15s ease;
       --transition-normal: 0.25s ease;
       
+      /* Box Shadows */
       --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -76,17 +85,41 @@
       
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
-    body.light-theme .brand-container { background-color: #ffffff; }
-    body.light-theme .sidebar-footer { background-color: #f1f5f9; }
-    body.light-theme th { background-color: #f8fafc; color: #475569; }
-    body.light-theme .status-badge.available { border-color: rgba(16, 185, 129, 0.5); background-color: rgba(16, 185, 129, 0.1); }
-    body.light-theme .status-badge.charging { border-color: rgba(59, 130, 246, 0.5); background-color: rgba(59, 130, 246, 0.1); }
+
+    body.light-theme .brand-container { 
+      background-color: #ffffff; 
+    }
+    
+    body.light-theme .sidebar-footer { 
+      background-color: #f1f5f9; 
+    }
+    
+    body.light-theme th { 
+      background-color: #f8fafc; 
+      color: #475569; 
+    }
+    
+    body.light-theme .status-badge.available { 
+      border-color: rgba(16, 185, 129, 0.5); 
+      background-color: rgba(16, 185, 129, 0.1); 
+    }
+    
+    body.light-theme .status-badge.charging { 
+      border-color: rgba(59, 130, 246, 0.5); 
+      background-color: rgba(59, 130, 246, 0.1); 
+    }
 
     /* --- 3. Global Reset & Typography --- */
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      margin-top: 0;
+      margin-right: 0;
+      margin-bottom: 0;
+      margin-left: 0;
+      padding-top: 0;
+      padding-right: 0;
+      padding-bottom: 0;
+      padding-left: 0;
     }
 
     body {
@@ -94,6 +127,7 @@
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       display: flex;
+      flex-direction: row;
       min-height: 100vh;
       overflow-x: hidden;
       font-size: 14px;
@@ -105,20 +139,28 @@
     aside {
       width: var(--sidebar-width);
       background-color: var(--bg-surface);
-      border-right: 1px solid var(--border-color);
+      border-right-width: 1px;
+      border-right-style: solid;
+      border-right-color: var(--border-color);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       z-index: 40;
-      transition: transform var(--transition-normal);
+      transition-property: transform;
+      transition-duration: var(--transition-normal);
     }
 
     .brand-container {
-      padding: 20px 24px;
+      padding-top: 20px;
+      padding-right: 24px;
+      padding-bottom: 20px;
+      padding-left: 24px;
       display: flex;
       align-items: center;
       gap: 16px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
       height: var(--header-height);
       background-color: rgba(17, 24, 39, 0.95);
     }
@@ -126,12 +168,12 @@
     .brand-logo {
       width: 42px;
       height: 42px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-green));
+      background-image: linear-gradient(135deg, var(--accent-primary), var(--accent-green));
       border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #ffffff;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
 
@@ -155,21 +197,31 @@
 
     .brand-badge {
       font-size: 10px;
-      background: rgba(59, 130, 246, 0.15);
+      background-color: rgba(59, 130, 246, 0.15);
       color: #93c5fd;
-      padding: 3px 8px;
+      padding-top: 3px;
+      padding-right: 8px;
+      padding-bottom: 3px;
+      padding-left: 8px;
       border-radius: 12px;
       text-transform: uppercase;
       font-weight: 800;
       align-self: flex-start;
       margin-top: 4px;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-width: 1px;
+      border-style: solid;
+      border-color: rgba(59, 130, 246, 0.3);
       letter-spacing: 0.5px;
     }
 
     nav {
-      flex: 1;
-      padding: 24px 16px;
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: auto;
+      padding-top: 24px;
+      padding-right: 16px;
+      padding-bottom: 24px;
+      padding-left: 16px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -182,22 +234,31 @@
       text-transform: uppercase;
       letter-spacing: 1.2px;
       color: var(--text-muted);
-      padding: 16px 10px 8px 10px;
+      padding-top: 16px;
+      padding-right: 10px;
+      padding-bottom: 8px;
+      padding-left: 10px;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 12px 16px;
+      padding-top: 12px;
+      padding-right: 16px;
+      padding-bottom: 12px;
+      padding-left: 16px;
       color: var(--text-muted);
       text-decoration: none;
       border-radius: var(--radius-md);
       font-weight: 600;
       font-size: 14px;
       cursor: pointer;
-      transition: all var(--transition-fast);
-      border: 1px solid transparent;
+      transition-property: all;
+      transition-duration: var(--transition-fast);
+      border-width: 1px;
+      border-style: solid;
+      border-color: transparent;
     }
 
     .nav-item svg {
@@ -218,14 +279,19 @@
 
     .nav-item.active {
       background-color: var(--accent-primary);
-      color: white;
+      color: #ffffff;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
       border-color: var(--accent-primary);
     }
 
     .sidebar-footer {
-      padding: 20px 24px;
-      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      padding-right: 24px;
+      padding-bottom: 20px;
+      padding-left: 24px;
+      border-top-width: 1px;
+      border-top-style: solid;
+      border-top-color: var(--border-color);
       font-size: 12px;
       color: var(--text-muted);
       background-color: rgba(0, 0, 0, 0.15);
@@ -248,7 +314,9 @@
 
     /* --- 5. Main Application Header --- */
     .app-main {
-      flex: 1;
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: auto;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -259,8 +327,13 @@
 
     header {
       background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border-color);
-      padding: 0 32px;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
+      padding-top: 0;
+      padding-right: 32px;
+      padding-bottom: 0;
+      padding-left: 32px;
       height: var(--header-height);
       display: flex;
       align-items: center;
@@ -275,12 +348,18 @@
       display: flex;
       align-items: center;
       background-color: var(--bg-base);
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       border-radius: var(--radius-md);
-      padding: 10px 16px;
+      padding-top: 10px;
+      padding-right: 16px;
+      padding-bottom: 10px;
+      padding-left: 16px;
       width: 480px;
       gap: 12px;
-      transition: border-color var(--transition-fast);
+      transition-property: border-color;
+      transition-duration: var(--transition-fast);
     }
 
     .search-box:focus-within {
@@ -297,10 +376,10 @@
     }
 
     .search-box input {
-      background: transparent;
-      border: none;
+      background-color: transparent;
+      border-width: 0;
       color: var(--text-main);
-      outline: none;
+      outline-width: 0;
       width: 100%;
       font-size: 14px;
     }
@@ -315,26 +394,35 @@
       gap: 24px;
     }
 
-    /* Theme Switcher Toggle */
+    /* Theme Switcher Segmented Control */
     .theme-switcher {
       display: flex;
-      background: var(--bg-base);
-      border: 1px solid var(--border-color);
+      background-color: var(--bg-base);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       border-radius: var(--radius-md);
       overflow: hidden;
-      padding: 2px;
+      padding-top: 2px;
+      padding-right: 2px;
+      padding-bottom: 2px;
+      padding-left: 2px;
     }
 
     .theme-switcher button {
-      background: transparent;
-      border: none;
+      background-color: transparent;
+      border-width: 0;
       color: var(--text-muted);
-      padding: 6px 12px;
+      padding-top: 6px;
+      padding-right: 12px;
+      padding-bottom: 6px;
+      padding-left: 12px;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       border-radius: var(--radius-sm);
-      transition: all var(--transition-fast);
+      transition-property: all;
+      transition-duration: var(--transition-fast);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -347,8 +435,8 @@
     }
 
     .theme-switcher button.active {
-      background: var(--accent-primary);
-      color: white;
+      background-color: var(--accent-primary);
+      color: #ffffff;
       box-shadow: var(--shadow-sm);
     }
 
@@ -362,11 +450,16 @@
       gap: 10px;
       font-size: 12px;
       font-weight: 700;
-      padding: 8px 16px;
+      padding-top: 8px;
+      padding-right: 16px;
+      padding-bottom: 8px;
+      padding-left: 16px;
       border-radius: 30px;
       background-color: var(--accent-green-bg);
       color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-width: 1px;
+      border-style: solid;
+      border-color: rgba(16, 185, 129, 0.3);
       letter-spacing: 0.5px;
     }
 
@@ -375,7 +468,9 @@
       height: 8px;
       border-radius: 50%;
       background-color: var(--accent-green);
-      animation: pulse 2s infinite;
+      animation-name: pulse;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
       box-shadow: 0 0 8px var(--accent-green);
     }
 
@@ -389,10 +484,13 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      border-left: 1px solid var(--border-color);
+      border-left-width: 1px;
+      border-left-style: solid;
+      border-left-color: var(--border-color);
       padding-left: 24px;
       cursor: pointer;
-      transition: opacity var(--transition-fast);
+      transition-property: opacity;
+      transition-duration: var(--transition-fast);
     }
 
     .user-profile:hover {
@@ -403,14 +501,16 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #4b5563, #1f2937);
+      background-image: linear-gradient(135deg, #4b5563, #1f2937);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-size: 14px;
-      color: white;
-      border: 2px solid var(--border-color);
+      color: #ffffff;
+      border-width: 2px;
+      border-style: solid;
+      border-color: var(--border-color);
       box-shadow: var(--shadow-sm);
     }
 
@@ -419,15 +519,40 @@
       flex-direction: column;
     }
 
-    .user-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
-    .user-role { font-size: 12px; font-weight: 500; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
-    .user-role svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .user-name { 
+      font-size: 14px; 
+      font-weight: 700; 
+      color: var(--text-main); 
+    }
+    
+    .user-role { 
+      font-size: 12px; 
+      font-weight: 500; 
+      color: var(--text-muted); 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+    }
+    
+    .user-role svg { 
+      width: 12px; 
+      height: 12px; 
+      fill: none; 
+      stroke: currentColor; 
+      stroke-width: 2; 
+    }
 
     /* --- 6. View Container & Routing Animations --- */
     .content-area {
-      padding: 32px;
+      padding-top: 32px;
+      padding-right: 32px;
+      padding-bottom: 32px;
+      padding-left: 32px;
       max-width: 1600px;
-      margin: 0 auto;
+      margin-top: 0;
+      margin-right: auto;
+      margin-bottom: 0;
+      margin-left: auto;
       width: 100%;
     }
 
@@ -435,7 +560,9 @@
       display: none;
       flex-direction: column;
       gap: 28px;
-      animation: viewFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      animation-name: viewFadeIn;
+      animation-duration: 0.4s;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .view-section.active {
@@ -456,14 +583,20 @@
 
     .kpi-card {
       background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 24px;
+      padding-top: 24px;
+      padding-right: 24px;
+      padding-bottom: 24px;
+      padding-left: 24px;
       display: flex;
       flex-direction: column;
       gap: 12px;
       box-shadow: var(--shadow-md);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      transition-property: transform, box-shadow;
+      transition-duration: var(--transition-fast);
       position: relative;
       overflow: hidden;
     }
@@ -471,7 +604,10 @@
     .kpi-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; width: 4px; height: 100%;
+      top: 0; 
+      left: 0; 
+      width: 4px; 
+      height: 100%;
       background-color: var(--border-color);
     }
 
@@ -509,7 +645,13 @@
       color: var(--text-muted);
     }
     
-    .kpi-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .kpi-icon svg { 
+      width: 18px; 
+      height: 18px; 
+      fill: none; 
+      stroke: currentColor; 
+      stroke-width: 2; 
+    }
 
     .kpi-value {
       font-size: 36px;
@@ -537,14 +679,23 @@
       margin-top: 4px;
     }
 
-    .kpi-sub svg { width: 14px; height: 14px; stroke-width: 2.5; }
+    .kpi-sub svg { 
+      width: 14px; 
+      height: 14px; 
+      stroke-width: 2.5; 
+    }
 
     /* --- 8. Standard Panels & UI Components --- */
     .panel {
       background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 28px;
+      padding-top: 28px;
+      padding-right: 28px;
+      padding-bottom: 28px;
+      padding-left: 28px;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -555,7 +706,9 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
       padding-bottom: 20px;
     }
 
@@ -569,7 +722,13 @@
       gap: 10px;
     }
 
-    .panel-title svg { width: 22px; height: 22px; fill: none; stroke: var(--accent-primary); stroke-width: 2; }
+    .panel-title svg { 
+      width: 22px; 
+      height: 22px; 
+      fill: none; 
+      stroke: var(--accent-primary); 
+      stroke-width: 2; 
+    }
 
     .panel-subtitle {
       font-size: 14px;
@@ -597,6 +756,12 @@
       gap: 24px;
     }
 
+    .estimator-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
     .input-field {
       display: flex;
       flex-direction: column;
@@ -611,14 +776,20 @@
 
     .custom-input, .custom-select {
       background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       color: var(--text-main);
-      padding: 14px 16px;
+      padding-top: 14px;
+      padding-right: 16px;
+      padding-bottom: 14px;
+      padding-left: 16px;
       border-radius: var(--radius-md);
       font-size: 14px;
-      outline: none;
+      outline-width: 0;
       width: 100%;
-      transition: all var(--transition-fast);
+      transition-property: all;
+      transition-duration: var(--transition-fast);
       font-family: inherit;
     }
 
@@ -648,19 +819,25 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px 24px;
+      padding-top: 12px;
+      padding-right: 24px;
+      padding-bottom: 12px;
+      padding-left: 24px;
       border-radius: var(--radius-md);
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition-property: all;
+      transition-duration: var(--transition-fast);
       font-family: inherit;
     }
 
     .btn-primary {
       background-color: var(--accent-primary);
-      color: white;
-      border: 1px solid var(--accent-primary);
+      color: #ffffff;
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--accent-primary);
       box-shadow: var(--shadow-md);
     }
 
@@ -672,13 +849,15 @@
     }
 
     .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border-light);
+      background-color: transparent;
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-light);
       color: var(--text-main);
     }
 
     .btn-outline:hover {
-      background: var(--bg-card);
+      background-color: var(--bg-card);
       border-color: var(--text-muted);
     }
 
@@ -699,13 +878,19 @@
 
     .charger-card {
       background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 24px;
+      padding-top: 24px;
+      padding-right: 24px;
+      padding-bottom: 24px;
+      padding-left: 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      transition-property: transform, box-shadow;
+      transition-duration: var(--transition-fast);
       position: relative;
       overflow: hidden;
     }
@@ -713,12 +898,16 @@
     .charger-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 4px;
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 4px;
       background-color: var(--border-color);
     }
 
     .charger-card.available::before { background-color: var(--accent-green); }
     .charger-card.charging::before { background-color: var(--accent-primary); }
+    .charger-card.faulted::before { background-color: var(--accent-red); }
 
     .charger-card:hover {
       transform: translateY(-4px);
@@ -736,13 +925,18 @@
     }
 
     .type-badge {
-      background: var(--bg-surface);
-      padding: 4px 10px;
+      background-color: var(--bg-surface);
+      padding-top: 4px;
+      padding-right: 10px;
+      padding-bottom: 4px;
+      padding-left: 10px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 800;
       color: var(--text-muted);
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       letter-spacing: 0.5px;
     }
 
@@ -755,7 +949,10 @@
 
     .status-badge {
       font-size: 11px;
-      padding: 6px 12px;
+      padding-top: 6px;
+      padding-right: 12px;
+      padding-bottom: 6px;
+      padding-left: 12px;
       border-radius: 20px;
       font-weight: 800;
       text-transform: uppercase;
@@ -763,26 +960,52 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      border: 1px solid transparent;
+      border-width: 1px;
+      border-style: solid;
+      border-color: transparent;
     }
 
-    .status-badge.available { background-color: var(--accent-green-bg); color: var(--accent-green); border-color: rgba(16, 185, 129, 0.3); }
-    .status-badge.charging { background-color: var(--accent-red-bg); color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3); }
+    .status-badge.available { 
+      background-color: var(--accent-green-bg); 
+      color: var(--accent-green); 
+      border-color: rgba(16, 185, 129, 0.3); 
+    }
+    
+    .status-badge.charging { 
+      background-color: var(--accent-red-bg); 
+      color: var(--accent-red); 
+      border-color: rgba(239, 68, 68, 0.3); 
+    }
 
     .status-badge.charging .live-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: var(--accent-red);
-      animation: pulseLive 1.5s infinite;
+      width: 6px; 
+      height: 6px; 
+      border-radius: 50%; 
+      background-color: var(--accent-red);
+      animation-name: pulseLive;
+      animation-duration: 1.5s;
+      animation-iteration-count: infinite;
     }
-    @keyframes pulseLive { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    
+    @keyframes pulseLive { 
+      0% { opacity: 1; } 
+      50% { opacity: 0.4; } 
+      100% { opacity: 1; } 
+    }
 
     .charger-metrics {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--bg-surface);
-      padding: 16px 20px;
+      background-color: var(--bg-surface);
+      padding-top: 16px;
+      padding-right: 20px;
+      padding-bottom: 16px;
+      padding-left: 20px;
       border-radius: var(--radius-md);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-width: 1px;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.05);
     }
 
     .metric-group {
@@ -812,7 +1035,9 @@
     .table-wrapper {
       width: 100%;
       overflow-x: auto;
-      border: 1px solid var(--border-color);
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color);
       border-radius: var(--radius-md);
       background-color: var(--bg-card);
     }
@@ -825,10 +1050,15 @@
     }
 
     thead th {
-      padding: 16px 20px;
+      padding-top: 16px;
+      padding-right: 20px;
+      padding-bottom: 16px;
+      padding-left: 20px;
       color: var(--text-muted);
       font-weight: 800;
-      border-bottom: 2px solid var(--border-color);
+      border-bottom-width: 2px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -836,14 +1066,22 @@
       white-space: nowrap;
       cursor: pointer;
       user-select: none;
-      transition: background var(--transition-fast);
+      transition-property: background;
+      transition-duration: var(--transition-fast);
     }
 
-    thead th:hover { background-color: rgba(0, 0, 0, 0.3); }
+    thead th:hover { 
+      background-color: rgba(0, 0, 0, 0.3); 
+    }
 
     tbody td {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--border-color);
+      padding-top: 18px;
+      padding-right: 20px;
+      padding-bottom: 18px;
+      padding-left: 20px;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
       vertical-align: middle;
       color: var(--text-main);
     }
@@ -852,88 +1090,221 @@
       background-color: var(--bg-surface);
     }
 
-    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:last-child td { 
+      border-bottom-width: 0; 
+    }
 
     .table-pagination {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 20px;
-      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      padding-right: 20px;
+      padding-bottom: 16px;
+      padding-left: 20px;
+      border-top-width: 1px;
+      border-top-style: solid;
+      border-top-color: var(--border-color);
       background-color: var(--bg-surface);
       font-size: 13px;
       color: var(--text-muted);
     }
 
-    .page-controls { display: flex; gap: 8px; }
+    .page-controls { 
+      display: flex; 
+      gap: 8px; 
+    }
+    
     .page-btn {
-      background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
-      padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+      background-color: var(--bg-card); 
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color); 
+      color: var(--text-main);
+      padding-top: 6px;
+      padding-right: 12px;
+      padding-bottom: 6px;
+      padding-left: 12px;
+      border-radius: var(--radius-sm); 
+      cursor: pointer; 
+      font-weight: 600;
     }
-    .page-btn:hover:not(:disabled) { background: var(--border-light); }
-    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .page-btn:hover:not(:disabled) { 
+      background-color: var(--border-light); 
+    }
+    
+    .page-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
+    }
 
-    /* --- 11. Modal Overlays --- */
+    /* --- 11. Modal Overlays (Hardware Provisioning) --- */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
-      display: flex; justify-content: center; align-items: center; z-index: 999;
-      opacity: 0; pointer-events: none; transition: opacity var(--transition-normal);
+      position: fixed; 
+      inset: 0; 
+      background-color: rgba(0, 0, 0, 0.7); 
+      backdrop-filter: blur(4px);
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 999;
+      opacity: 0; 
+      pointer-events: none; 
+      transition-property: opacity;
+      transition-duration: var(--transition-normal);
     }
-    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    
+    .modal-overlay.active { 
+      opacity: 1; 
+      pointer-events: all; 
+    }
 
     .modal-content {
-      background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg);
-      width: 100%; max-width: 540px; box-shadow: var(--shadow-xl);
-      transform: translateY(20px); transition: transform var(--transition-normal);
+      background-color: var(--bg-surface); 
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--border-color); 
+      border-radius: var(--radius-lg);
+      width: 100%; 
+      max-width: 540px; 
+      box-shadow: var(--shadow-xl);
+      transform: translateY(20px); 
+      transition-property: transform;
+      transition-duration: var(--transition-normal);
     }
-    .modal-overlay.active .modal-content { transform: translateY(0); }
+    
+    .modal-overlay.active .modal-content { 
+      transform: translateY(0); 
+    }
 
     .modal-header {
-      padding: 24px 32px; border-bottom: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 24px;
+      padding-right: 32px;
+      padding-bottom: 24px;
+      padding-left: 32px;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
     }
-    .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
+    
+    .modal-title { 
+      font-size: 20px; 
+      font-weight: 800; 
+      color: var(--text-main); 
+    }
+    
     .btn-close {
-      background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer;
-      transition: color var(--transition-fast);
+      background-color: transparent; 
+      border-width: 0; 
+      color: var(--text-muted); 
+      font-size: 24px; 
+      cursor: pointer;
+      transition-property: color;
+      transition-duration: var(--transition-fast);
     }
-    .btn-close:hover { color: var(--accent-red); }
+    
+    .btn-close:hover { 
+      color: var(--accent-red); 
+    }
 
-    .modal-body { padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+    .modal-body { 
+      padding-top: 32px;
+      padding-right: 32px;
+      padding-bottom: 32px;
+      padding-left: 32px;
+      display: flex; 
+      flex-direction: column; 
+      gap: 20px; 
+    }
+    
     .modal-footer {
-      padding: 24px 32px; border-top: 1px solid var(--border-color); background: var(--bg-card);
-      border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg);
-      display: flex; justify-content: flex-end; gap: 12px;
+      padding-top: 24px;
+      padding-right: 32px;
+      padding-bottom: 24px;
+      padding-left: 32px;
+      border-top-width: 1px;
+      border-top-style: solid;
+      border-top-color: var(--border-color); 
+      background-color: var(--bg-card);
+      border-bottom-left-radius: var(--radius-lg); 
+      border-bottom-right-radius: var(--radius-lg);
+      display: flex; 
+      justify-content: flex-end; 
+      gap: 12px;
     }
 
     /* --- 12. Toast Notification System --- */
     #toast-container {
-      position: fixed; bottom: 32px; right: 32px; display: flex; flex-direction: column; gap: 12px; z-index: 10000;
+      position: fixed; 
+      bottom: 32px; 
+      right: 32px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      z-index: 10000;
     }
+    
     .toast {
-      background: var(--bg-surface); border-left: 5px solid var(--accent-primary); color: var(--text-main);
-      padding: 16px 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
-      display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 14px;
-      animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-surface); 
+      border-left-width: 5px;
+      border-left-style: solid;
+      border-left-color: var(--accent-primary); 
+      color: var(--text-main);
+      padding-top: 16px;
+      padding-right: 24px;
+      padding-bottom: 16px;
+      padding-left: 24px;
+      border-radius: var(--radius-md); 
+      box-shadow: var(--shadow-lg);
+      display: flex; 
+      align-items: center; 
+      gap: 14px; 
+      font-weight: 600; 
+      font-size: 14px;
+      animation-name: slideInUp;
+      animation-duration: 0.4s;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      animation-fill-mode: forwards;
+      border-top-width: 1px;
+      border-top-style: solid;
+      border-top-color: var(--border-color); 
+      border-right-width: 1px;
+      border-right-style: solid;
+      border-right-color: var(--border-color); 
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: var(--border-color);
     }
-    @keyframes slideInUp { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes fadeOutDown { to { opacity: 0; transform: translateY(20px); } }
+    
+    @keyframes slideInUp { 
+      from { opacity: 0; transform: translateX(100%); } 
+      to { opacity: 1; transform: translateX(0); } 
+    }
+    
+    @keyframes fadeOutDown { 
+      to { opacity: 0; transform: translateY(20px); } 
+    }
 
     /* --- 13. Responsive Media Queries --- */
     @media (max-width: 1200px) {
       .chart-panel-row { grid-template-columns: 1fr; }
       .kpi-row { grid-template-columns: repeat(2, 1fr); }
     }
+    
     @media (max-width: 900px) {
       aside { position: fixed; height: 100vh; transform: translateX(-100%); }
       aside.open { transform: translateX(0); }
       .search-box { width: 200px; }
     }
+    
     @media (max-width: 600px) {
       .kpi-row { grid-template-columns: 1fr; }
-      header { padding: 0 16px; }
-      .content-area { padding: 16px; }
+      header { padding-top: 0; padding-right: 16px; padding-bottom: 0; padding-left: 16px; }
+      .content-area { padding-top: 16px; padding-right: 16px; padding-bottom: 16px; padding-left: 16px; }
       .search-box { display: none; }
     }
   </style>
@@ -941,12 +1312,11 @@
 <body>
 
   <!-- =========================================================================
-       SIDEBAR NAVIGATION
+       SIDEBAR NAVIGATION (SPA ROUTING)
        ========================================================================= -->
   <aside id="main-sidebar">
     <div class="brand-container">
       <div class="brand-logo">
-        <!-- SVG Lightning Bolt -->
         <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
       <div class="brand-text-wrapper">
@@ -978,7 +1348,7 @@
 
       <div class="nav-label">System Control</div>
       <a class="nav-item" data-target="view-settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         System Settings
       </a>
     </nav>
@@ -1005,7 +1375,8 @@
       </div>
 
       <div class="header-actions">
-        <!-- Explicit Light & Dark Theme Switcher -->
+        
+        <!-- Theme Switcher Explicit Control -->
         <div class="theme-switcher">
           <button onclick="setTheme('light')" id="btn-light">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -1254,9 +1625,9 @@
                 <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export CSV
               </button>
-              <button class="btn-outline btn-icon" onclick="showToast('Generating official compliance PDF...', 'info')">
+              <button class="btn-outline btn-icon" onclick="generatePDF()">
                 <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                <button class="btn-outline btn-icon" onclick="generatePDF()">
+                Generate PDF
               </button>
             </div>
           </div>
@@ -1274,26 +1645,18 @@
                 </tr>
               </thead>
               <tbody id="cdr-table-body">
-                <!-- Generating dummy data for visual robustness -->
-                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9081</td><td><strong>Sandton City Hub</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***9921</td><td><strong>28.4</strong></td><td>34 mins</td><td style="font-weight: 800; font-size: 15px;">R 213.00</td><td><span class="status-badge charging"><div class="live-dot"></div>Charging Live</span></td></tr>
-                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9080</td><td><strong>OR Tambo Airport</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***4402</td><td><strong>42.1</strong></td><td>48 mins</td><td style="font-weight: 800; font-size: 15px;">R 315.75</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
-                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9079</td><td><strong>Springs Mall AC</strong><br><span style="font-size: 11px; color: var(--text-muted);">Type 2 Cable</span></td><td>TAG_***8819</td><td><strong>14.8</strong></td><td>2h 22m</td><td style="font-weight: 800; font-size: 15px;">R 111.00</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
-                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9078</td><td><strong>Menlyn Mall</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***7712</td><td><strong>55.2</strong></td><td>55 mins</td><td style="font-weight: 800; font-size: 15px;">R 414.00</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
-                <tr><td style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">#CDR-2026-9077</td><td><strong>Mall of Africa</strong><br><span style="font-size: 11px; color: var(--text-muted);">DC CCS2 Fast</span></td><td>TAG_***3398</td><td><strong>18.5</strong></td><td>21 mins</td><td style="font-weight: 800; font-size: 15px;">R 138.75</td><td><span class="status-badge available">Settled (POPIA)</span></td></tr>
+                <!-- Data populated dynamically via pagination script -->
               </tbody>
             </table>
-            <!-- Pagination Controls -->
+            <!-- Interactive Pagination Controls -->
             <div class="table-pagination">
-              <span>Showing 1 to 5 of 124 entries</span>
-              <!-- Interactive Pagination Controls -->
-         <div class="table-pagination">
-           <span id="pagination-info">Showing 1 to 5 of 12 entries</span>
-           <div class="page-controls">
-             <button class="page-btn" id="btn-prev" onclick="changePage(-1)">Previous</button>
-             <button class="page-btn" id="page-num" style="background: var(--accent-primary); color: white; border-color: var(--accent-primary);">1</button>
-             <button class="page-btn" id="btn-next" onclick="changePage(1)">Next</button>
-           </div>
-         </div>
+              <span id="pagination-info">Showing 1 to 5 of 12 entries</span>
+              <div class="page-controls">
+                <button class="page-btn" id="btn-prev" onclick="changePage(-1)">Previous</button>
+                <button class="page-btn" id="page-num" style="background-color: var(--accent-primary); color: white; border-color: var(--accent-primary);">1</button>
+                <button class="page-btn" id="btn-next" onclick="changePage(1)">Next</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1486,7 +1849,8 @@
           { 
             label: 'Aggregated Live Network Draw (kW)', 
             data: [120,125,122,130,128,135,133], 
-            borderColor: '#3b82f6', backgroundColor: gradientFill, borderWidth: 2.5, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#60a5fa' 
+            borderColor: '#3b82f6', backgroundColor: gradientFill, borderWidth: 2.5, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#60a5fa',
+            pointBorderColor: '#1e3a8a'
           }
         ]
       },
@@ -1560,11 +1924,12 @@
       }
     }
 
+    // Bind event listener to the hardware filter dropdown
     document.getElementById('type-filter').addEventListener('change', executeRenderCycle);
 
     /**
      * @function executeRenderCycle
-     * @description Core UI Render loop. Calculates KPIs, updates the chart, builds the Grid, and populates Tables.
+     * @description Core UI Render loop. Calculates KPIs, updates the chart, builds the Grid, and populates the Station Management Table.
      */
     function executeRenderCycle() {
       if (!latestChargerData.length) return;
@@ -1576,8 +1941,8 @@
         if (c.status === 'Charging') activeCount++; 
       });
       
-      document.getElementById('kpi-total-kw').innerHTML = `${totalKw.toFixed(1)} <small>kW</small>`;
-      document.getElementById('kpi-active-chargers').innerHTML = `${activeCount} <small>/ ${latestChargerData.length}</small>`;
+      document.getElementById('kpi-total-kw').innerHTML = `${totalKw.toFixed(1)} <small style="font-size: 16px; color: var(--text-muted);">kW</small>`;
+      document.getElementById('kpi-active-chargers').innerHTML = `${activeCount} <small style="font-size: 16px; color: var(--text-muted);">/ ${latestChargerData.length}</small>`;
 
       // 2. Update DLM Chart
       const timeStr = new Date().toLocaleTimeString('en-US', {hour12: false});
@@ -1593,39 +1958,47 @@
       const currentFilter = document.getElementById('type-filter').value;
       const filteredData = latestChargerData.filter(c => currentFilter === 'ALL' || c.type === currentFilter);
 
-      document.getElementById('charger-cards').innerHTML = filteredData.map(c => {
-        const isCharging = c.status === 'Charging';
-        const statusClass = isCharging ? 'charging' : 'available';
-        const plugIcon = c.type === 'DC' ? '⚡ CCS2 Fast' : '🔌 Type 2 AC';
-        return `
-          <div class="charger-card ${statusClass}">
-            <div class="charger-card-top">
-              <div>
-                <div class="charger-name">
-                  ${c.name} 
-                  <span class="type-badge">${c.type}</span>
+      // 4. Render DOM Elements for Main Grid
+      const gridContainer = document.getElementById('charger-cards');
+      
+      if (filteredData.length === 0) {
+        gridContainer.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 8px;">No hardware matches the selected filter.</div>`;
+      } else {
+        gridContainer.innerHTML = filteredData.map(c => {
+          const isCharging = c.status === 'Charging';
+          const statusClass = isCharging ? 'charging' : 'available';
+          const plugIcon = c.type === 'DC' ? '⚡ CCS2 Fast' : '🔌 Type 2 AC';
+          
+          return `
+            <div class="charger-card ${statusClass}">
+              <div class="charger-card-top">
+                <div>
+                  <div class="charger-name">
+                    ${c.name} 
+                    <span class="type-badge">${c.type}</span>
+                  </div>
+                  <div class="charger-id">OCPP ID: ${c.id}</div>
                 </div>
-                <div class="charger-id">OCPP ID: ${c.id}</div>
+                <span class="status-badge ${statusClass}">
+                  ${isCharging ? '<div class="live-dot"></div>' : ''} ${c.status}
+                </span>
               </div>
-              <span class="status-badge ${statusClass}">
-                ${isCharging ? '<div class="live-dot"></div>' : ''} ${c.status}
-              </span>
+              <div class="charger-metrics">
+                <div class="metric-group">
+                  <span>Live Power Output</span>
+                  <strong>${c.currentKw.toFixed(1)} <small style="font-size:16px; font-weight:600; color:var(--text-muted); margin-left:4px;">kW</small></strong>
+                </div>
+                <div class="metric-group" style="text-align: right;">
+                  <span>Connector Type</span>
+                  <strong style="font-size: 14px;">${plugIcon}</strong>
+                </div>
+              </div>
             </div>
-            <div class="charger-metrics">
-              <div class="metric-group">
-                <span>Live Power Output</span>
-                <strong>${c.currentKw.toFixed(1)} <small style="font-size:16px; font-weight:600; color:var(--text-muted); margin-left:4px;">kW</small></strong>
-              </div>
-              <div class="metric-group" style="text-align: right;">
-                <span>Connector Type</span>
-                <strong style="font-size: 14px;">${plugIcon}</strong>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
 
-      // 4. Populate the Station Management Table in View 2
+      // 5. Populate the Station Management Table in View 2
       document.getElementById('station-management-table').innerHTML = latestChargerData.map(c => {
         const isC = c.status === 'Charging';
         const statCol = isC ? 'var(--accent-primary)' : 'var(--accent-green)';
@@ -1650,130 +2023,8 @@
     }
 
     /**
-     * @function exportTableToCSV
-     * @description Generates a formatted CSV file from the HTML table data and prompts browser download.
-     */
-    function exportTableToCSV(tableId, filename) {
-      const table = document.getElementById(tableId);
-      let csv = [];
-      for (let i = 0; i < table.rows.length; i++) {
-        let row = [], cols = table.rows[i].querySelectorAll('td, th');
-        for (let j = 0; j < cols.length; j++) {
-          // Clean text content to avoid formatting breaks
-          let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/(\s\s)/gm, " ");
-          row.push('"' + data + '"');
-        }
-        csv.push(row.join(','));
-      }
-      downloadCSV(csv.join('\n'), filename);
-    }
-
-    function downloadCSV(csv, filename) {
-      let csvFile;
-      let downloadLink;
-      csvFile = new Blob([csv], {type: "text/csv"});
-      downloadLink = document.createElement("a");
-      downloadLink.download = filename;
-      downloadLink.href = window.URL.createObjectURL(csvFile);
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      showToast('CSV Export generated successfully.', 'success');
-    }
-
-    /**
-     * @function sortTable
-     * @description Allows administrators to click column headers to alphabetically/numerically sort rows.
-     */
-    function sortTable(n, tableId) {
-      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-      table = document.getElementById(tableId);
-      switching = true;
-      dir = "asc"; 
-      while (switching) {
-        switching = false;
-        rows = table.rows;
-        for (i = 1; i < (rows.length - 1); i++) {
-          shouldSwitch = false;
-          x = rows[i].getElementsByTagName("TD")[n];
-          y = rows[i + 1].getElementsByTagName("TD")[n];
-          if (dir == "asc") {
-            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-              shouldSwitch = true; break;
-            }
-          } else if (dir == "desc") {
-            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-              shouldSwitch = true; break;
-            }
-          }
-        }
-        if (shouldSwitch) {
-          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-          switching = true;
-          switchcount ++;      
-        } else {
-          if (switchcount == 0 && dir == "asc") {
-            dir = "desc";
-            switching = true;
-          }
-        }
-      }
-    }
-
-    /**
-     * @description Modal Overlay Controllers
-     */
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.add('active');
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    function submitProvisioning() {
-      closeModal('provisionModal');
-      showToast('New EVSE hardware authorized and provisioned successfully.', 'success');
-    }
-
-    /**
-     * @description Simulated Application Logic Endpoints
-     */
-    function triggerRemoteReboot(evseId) {
-      showToast(`Sending OCPP Reset.Req command to ${evseId}...`, 'info');
-      setTimeout(() => showToast(`Hardware ${evseId} successfully rebooted.`, 'success'), 2000);
-    }
-
-    function simulateTariffUpdate() {
-      const ac = document.getElementById('tariff-ac').value;
-      const dc = document.getElementById('tariff-dc').value;
-      showToast(`Synchronizing base tariffs (AC: R${ac}, DC: R${dc})...`, 'info');
-      setTimeout(() => showToast(`Tariffs successfully deployed to all active EVSEs.`, 'success'), 1500);
-    }
-
-    function calculateTripRange() {
-      const vSelect = document.getElementById('vehicle-select');
-      const exactMaxRangeKm = parseFloat(vSelect.options[vSelect.selectedIndex].getAttribute('data-range'));
-      const batterySoc = parseFloat(document.getElementById('battery-soc').value);
-      const tripDist = parseFloat(document.getElementById('dest-select').value);
-      
-      const estRange = Math.round(exactMaxRangeKm * (batterySoc / 100));
-      const resultUI = document.getElementById('calc-result');
-      
-      if (estRange >= tripDist + 15) {
-        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: var(--accent-green); font-weight: 700; background: var(--accent-green-bg); padding: 4px 10px; border-radius: 4px;">Safe Trip ✅</span>`;
-        resultUI.style.borderColor = 'rgba(16,185,129,0.4)';
-      } else {
-        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: var(--accent-red); font-weight: 700; background: var(--accent-red-bg); padding: 4px 10px; border-radius: 4px;">Warning: Low Range ⚠️</span>`;
-        resultUI.style.borderColor = 'rgba(239,68,68,0.4)';
-      }
-    }
-
-    // Execute Startup connection
-    connectWebSocket();
-/**
-     * @description DYNAMIC PAGINATION & MOCK DATABASE
+     * @description DYNAMIC PAGINATION ENGINE
+     * Manages a simulated database of 12 historical records.
      */
     const mockCDRData = [
       { id: "#CDR-2026-9081", station: "Sandton City Hub", type: "DC CCS2 Fast", rfid: "TAG_***9921", kwh: 28.4, time: "34 mins", cost: 213.00, status: "Charging Live", statusClass: "charging" },
@@ -1829,16 +2080,52 @@
     });
 
     /**
+     * @function exportTableToCSV
+     * @description Generates a formatted CSV file from the HTML table data and prompts browser download.
+     * @param {string} tableId - The ID of the table element to parse
+     * @param {string} filename - The desired output filename
+     */
+    function exportTableToCSV(tableId, filename) {
+      const table = document.getElementById(tableId);
+      let csv = [];
+      for (let i = 0; i < table.rows.length; i++) {
+        let row = [], cols = table.rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+          // Clean text content to avoid formatting breaks
+          let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/(\s\s)/gm, " ");
+          row.push('"' + data + '"');
+        }
+        csv.push(row.join(','));
+      }
+      downloadCSV(csv.join('\n'), filename);
+    }
+
+    function downloadCSV(csv, filename) {
+      let csvFile;
+      let downloadLink;
+      csvFile = new Blob([csv], {type: "text/csv"});
+      downloadLink = document.createElement("a");
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      showToast('CSV Export generated successfully.', 'success');
+    }
+
+    /**
      * @description PDF GENERATION ENGINE
+     * Utilizes jsPDF and autoTable plugins to structure the DOM into a compliant document.
      */
     function generatePDF() {
       showToast('Generating official compliance PDF...', 'info');
       
       try {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Landscape for wide tables
+        const doc = new jsPDF('landscape'); 
         
-        // Add header
+        // Add corporate header
         doc.setFontSize(18);
         doc.text("ChargeTrack CSMS - Official Charge Detail Records (CDRs)", 14, 20);
         doc.setFontSize(11);
@@ -1850,11 +2137,11 @@
           html: '#cdr-table', 
           startY: 35,
           theme: 'grid',
-          headStyles: { fillColor: [59, 130, 246] }, // ChargeTrack Blue
+          headStyles: { fillColor: [59, 130, 246] },
           styles: { fontSize: 10 }
         });
         
-        // Save the PDF
+        // Prompt save to client
         doc.save('ChargeTrack_Expense_Analytics.pdf');
         showToast('PDF Export generated successfully.', 'success');
       } catch (err) {
@@ -1862,6 +2149,100 @@
         showToast('Error generating PDF. Check console logs.', 'error');
       }
     }
+
+    /**
+     * @function sortTable
+     * @description Allows administrators to click column headers to alphabetically/numerically sort rows.
+     * @param {number} n - The index of the column to sort
+     * @param {string} tableId - The ID of the table element to sort
+     */
+    function sortTable(n, tableId) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById(tableId);
+      switching = true;
+      dir = "asc"; 
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              shouldSwitch = true; break;
+            }
+          } else if (dir == "desc") {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              shouldSwitch = true; break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount ++;      
+        } else {
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+    }
+
+    /**
+     * @description MODAL OVERLAY CONTROLLERS (Hardware Provisioning)
+     */
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function submitProvisioning() {
+      closeModal('provisionModal');
+      showToast('New EVSE hardware authorized and provisioned successfully.', 'success');
+    }
+
+    /**
+     * @description SIMULATED APPLICATION LOGIC ENDPOINTS
+     */
+    function triggerRemoteReboot(evseId) {
+      showToast(`Sending OCPP Reset.Req command to ${evseId}...`, 'info');
+      setTimeout(() => showToast(`Hardware ${evseId} successfully rebooted.`, 'success'), 2000);
+    }
+
+    function simulateTariffUpdate() {
+      const ac = document.getElementById('tariff-ac').value;
+      const dc = document.getElementById('tariff-dc').value;
+      showToast(`Synchronizing base tariffs (AC: R${ac}, DC: R${dc})...`, 'info');
+      setTimeout(() => showToast(`Tariffs successfully deployed to all active EVSEs.`, 'success'), 1500);
+    }
+
+    function calculateTripRange() {
+      const vSelect = document.getElementById('vehicle-select');
+      const exactMaxRangeKm = parseFloat(vSelect.options[vSelect.selectedIndex].getAttribute('data-range'));
+      const batterySoc = parseFloat(document.getElementById('battery-soc').value);
+      const tripDist = parseFloat(document.getElementById('dest-select').value);
+      
+      const estRange = Math.round(exactMaxRangeKm * (batterySoc / 100));
+      const resultUI = document.getElementById('calc-result');
+      
+      if (estRange >= tripDist + 15) {
+        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: var(--accent-green); font-weight: 700; background: var(--accent-green-bg); padding: 4px 10px; border-radius: 4px;">Safe Trip ✅</span>`;
+        resultUI.style.borderColor = 'rgba(16,185,129,0.4)';
+      } else {
+        resultUI.innerHTML = `<span>Estimated Usable Range: <strong>${estRange} km</strong></span><span style="color: var(--accent-red); font-weight: 700; background: var(--accent-red-bg); padding: 4px 10px; border-radius: 4px;">Warning: Low Range ⚠️</span>`;
+        resultUI.style.borderColor = 'rgba(239,68,68,0.4)';
+      }
+    }
+
+    // Execute Startup connection on DOM initialization
+    connectWebSocket();
+
   </script>
 </body>
 </html>
