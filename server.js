@@ -58,6 +58,8 @@ let chargers = [
     { id: "GC-EKU-03", name: "Springs Mall AC", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.16" },
     { id: "GC-JHB-05", name: "Fourways Mall", status: "Charging", currentKw: 7.2, type: "AC", firmware: "v2.0.0", ip: "172.16.1.50" },
     { id: "GC-PTA-02", name: "Irene Link Centurion", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.88" }
+    { id: "GC-RBK-01", name: "Rosebank Mall BMW", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.2", ip: "10.0.2.14" },
+      { id: "GC-GRN-01", name: "Village Greenside AC", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.2", ip: "10.0.2.15" }
 ];
 
 function broadcastFleetState() {
