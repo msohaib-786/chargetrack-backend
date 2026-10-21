@@ -248,32 +248,40 @@
     </div>
   </div>
 
-  <!-- PASSWORD RESET MODAL -->
+  <!-- PASSWORD RESET MODAL (2-STEP OTP FLOW) -->
   <div id="resetModal" class="modal-backdrop">
     <div class="modal-content">
       <button onclick="closeResetModal()" class="btn-close">&times;</button>
       
       <div class="modal-title-row">
-        <span style="font-size: 22px;">🔑</span>
-        <h3 class="modal-title">Reset Password</h3>
+        <span style="font-size: 22px;">🛡️</span>
+        <h3 class="modal-title">Secure Password Reset</h3>
       </div>
       
-      <p class="modal-desc">
-        Enter your registered email address. An encrypted security reset dispatch will be simulated.
+      <p class="modal-desc" id="resetDesc">
+        Enter your registered email address. A 6-digit One-Time Password (OTP) will be sent to verify your identity.
       </p>
 
-      <form id="resetForm" onsubmit="handlePasswordReset(event)" style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- Step 1: Request OTP -->
+      <form id="requestOtpForm" onsubmit="handleRequestOtp(event)" style="display: flex; flex-direction: column; gap: 16px;">
         <div class="input-group">
           <label>Registered Email</label>
           <input type="email" id="resetEmail" class="custom-input" required placeholder="admin@chargetrack.co.za" />
         </div>
+        <button type="submit" class="btn-submit" style="margin-top: 4px;">Send OTP via Email</button>
+      </form>
 
+      <!-- Step 2: Verify OTP & Set New Password -->
+      <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)" style="display: none; flex-direction: column; gap: 16px;">
+        <div class="input-group">
+          <label>6-Digit OTP Code</label>
+          <input type="text" id="resetOtpCode" class="custom-input" required maxlength="6" pattern="\d{6}" placeholder="123456" style="letter-spacing: 4px; font-weight: 800; text-align: center; font-size: 18px;" />
+        </div>
         <div class="input-group">
           <label>New Password</label>
-          <input type="password" id="resetNewPass" class="custom-input" required minlength="6" placeholder="Enter new password" />
+          <input type="password" id="resetNewPass" class="custom-input" required minlength="6" placeholder="Enter new secure password" />
         </div>
-
-        <button type="submit" class="btn-submit" style="margin-top: 4px;">Update Credentials</button>
+        <button type="submit" class="btn-submit" style="margin-top: 4px; background: var(--accent-green); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Verify & Reset Password</button>
       </form>
 
       <div id="resetStatusMsg" style="display: none; margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600;"></div>
@@ -339,38 +347,82 @@
       setTimeout(() => switchTab('login'), 1500);
     }
 
-    // Password Reset Logic
+    // --- 2-STEP OTP PASSWORD RESET LOGIC ---
+    let generatedOtp = "";
+
     function openResetModal() {
       document.getElementById('resetModal').style.display = 'flex';
       document.getElementById('resetStatusMsg').style.display = 'none';
-      document.getElementById('resetForm').reset();
+      
+      // Reset to Step 1
+      document.getElementById('requestOtpForm').style.display = 'flex';
+      document.getElementById('verifyOtpForm').style.display = 'none';
+      document.getElementById('requestOtpForm').reset();
+      document.getElementById('verifyOtpForm').reset();
+      document.getElementById('resetDesc').innerText = "Enter your registered email address. A 6-digit One-Time Password (OTP) will be sent to verify your identity.";
     }
 
     function closeResetModal() {
       document.getElementById('resetModal').style.display = 'none';
     }
 
-    function handlePasswordReset(e) {
+    // Step 1: Generate OTP and transition UI
+    function handleRequestOtp(e) {
       e.preventDefault();
       const email = document.getElementById('resetEmail').value.trim();
-      const newPass = document.getElementById('resetNewPass').value;
       const statusEl = document.getElementById('resetStatusMsg');
 
       statusEl.style.display = 'block';
       statusEl.style.background = 'rgba(59, 130, 246, 0.15)';
       statusEl.style.color = '#60a5fa';
-      statusEl.innerText = 'Verifying directory and issuing token...';
+      statusEl.innerText = 'Connecting to mail server...';
 
       setTimeout(() => {
-        // Mock DB Update
+        // Generate a cryptographically simulated 6-digit OTP
+        generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Switch UI to Step 2
+        document.getElementById('requestOtpForm').style.display = 'none';
+        document.getElementById('verifyOtpForm').style.display = 'flex';
+        document.getElementById('resetDesc').innerHTML = `OTP sent to <strong>${email}</strong>. Please check your inbox.`;
+
+        // Display the OTP on screen for prototype testing purposes
+        statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        statusEl.style.color = '#34d399';
+        statusEl.innerHTML = `✅ Email dispatched successfully.<br><br><span style="color: var(--text-muted); font-size: 11px;">PROTOTYPE DEMO NOTE: Since there is no live SMTP server attached, your OTP code is: <strong style="color: white; font-size: 14px;">${generatedOtp}</strong></span>`;
+      }, 1200);
+    }
+
+    // Step 2: Validate OTP and update credentials
+    function handleVerifyOtp(e) {
+      e.preventDefault();
+      const enteredOtp = document.getElementById('resetOtpCode').value.trim();
+      const newPass = document.getElementById('resetNewPass').value;
+      const email = document.getElementById('resetEmail').value.trim();
+      const statusEl = document.getElementById('resetStatusMsg');
+
+      // Validation check
+      if (enteredOtp !== generatedOtp) {
+        statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        statusEl.style.color = '#ef4444';
+        statusEl.innerText = '❌ Invalid OTP code. Please check your email and try again.';
+        return;
+      }
+
+      statusEl.style.background = 'rgba(59, 130, 246, 0.15)';
+      statusEl.style.color = '#60a5fa';
+      statusEl.innerText = 'Verifying OTP encryption key...';
+
+      setTimeout(() => {
+        // Mock DB Update for frontend prototype
         localStorage.setItem(`pwd_${email}`, newPass);
 
         statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
         statusEl.style.color = '#34d399';
-        statusEl.innerText = `✅ Success! Password updated for ${email}.`;
+        statusEl.innerText = `✅ Authentication successful! Password updated for ${email}.`;
 
-        setTimeout(() => closeResetModal(), 2000);
-      }, 1200);
+        setTimeout(() => closeResetModal(), 2500);
+      }, 1000);
     }
   </script>
 </body>
