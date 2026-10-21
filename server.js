@@ -47,19 +47,19 @@ const registeredUsers = {
 };
 
 let chargers = [
-    { id: "GC-JHB-01", name: "Sandton City Hub - Bay 1", status: "Charging", currentKw: 45.2, type: "DC", firmware: "v1.4.2", ip: "192.168.1.10" },
-    { id: "GC-JHB-02", name: "Sandton City Hub - Bay 2", status: "Available", currentKw: 0, type: "DC", firmware: "v1.4.2", ip: "192.168.1.11" },
-    { id: "GC-PTA-01", name: "Menlyn Mall Pretoria", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.55" },
-    { id: "GC-MID-01", name: "Mall of Africa Waterfall", status: "Available", currentKw: 0, type: "DC", firmware: "v1.9.8", ip: "172.16.0.4" },
-    { id: "GC-JHB-03", name: "Melrose Arch - Bay 1", status: "Charging", currentKw: 11.0, type: "AC", firmware: "v3.1.0", ip: "192.168.2.22" },
-    { id: "GC-JHB-04", name: "Melrose Arch - Bay 2", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.0", ip: "192.168.2.23" },
-    { id: "GC-EKU-01", name: "OR Tambo Int. Airport", status: "Charging", currentKw: 52.4, type: "DC", firmware: "v2.1.5", ip: "10.1.1.100" },
-    { id: "GC-EKU-02", name: "East Rand Mall Boksburg", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.15" },
-    { id: "GC-EKU-03", name: "Springs Mall AC", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.16" },
-    { id: "GC-JHB-05", name: "Fourways Mall", status: "Charging", currentKw: 7.2, type: "AC", firmware: "v2.0.0", ip: "172.16.1.50" },
-    { id: "GC-PTA-02", name: "Irene Link Centurion", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.88" }
-    { id: "GC-RBK-01", name: "Rosebank Mall BMW", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.2", ip: "10.0.2.14" },
-    { id: "GC-GRN-01", name: "Village Greenside AC", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.2", ip: "10.0.2.15" }
+  { id: "GC-JHB-01", name: "Sandton City Hub - Bay 1", status: "Charging", currentKw: 45.2, type: "DC", firmware: "v1.4.2", ip: "192.168.1.10" },
+  { id: "GC-JHB-02", name: "Sandton City Hub - Bay 2", status: "Available", currentKw: 0, type: "DC", firmware: "v1.4.2", ip: "192.168.1.11" },
+  { id: "GC-PTA-01", name: "Menlyn Mall Pretoria", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.55" },
+  { id: "GC-MID-01", name: "Mall of Africa Waterfall", status: "Charging", currentKw: 38.5, type: "DC", firmware: "v1.9.8", ip: "172.16.0.4" },
+  { id: "GC-JHB-03", name: "Melrose Arch - Bay 1", status: "Charging", currentKw: 11.0, type: "AC", firmware: "v3.1.0", ip: "192.168.2.22" },
+  { id: "GC-JHB-04", name: "Melrose Arch - Bay 2", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.0", ip: "192.168.2.23" },
+  { id: "GC-EKU-01", name: "OR Tambo Int. Airport", status: "Charging", currentKw: 52.4, type: "DC", firmware: "v2.1.5", ip: "10.1.1.100" },
+  { id: "GC-EKU-02", name: "East Rand Mall Boksburg", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.15" },
+  { id: "GC-EKU-03", name: "Springs Mall AC", status: "Available", currentKw: 0, type: "AC", firmware: "v1.0.0", ip: "192.168.5.16" },
+  { id: "GC-JHB-05", name: "Fourways Mall", status: "Charging", currentKw: 7.2, type: "AC", firmware: "v2.0.0", ip: "172.16.1.50" },
+  { id: "GC-PTA-02", name: "Irene Link Centurion", status: "Available", currentKw: 0, type: "DC", firmware: "v2.0.1", ip: "10.0.0.88" },
+  { id: "GC-RBK-01", name: "Rosebank Mall BMW", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.2", ip: "10.0.2.14" },
+  { id: "GC-GRN-01", name: "Village Greenside AC", status: "Available", currentKw: 0, type: "AC", firmware: "v3.1.2", ip: "10.0.2.15" }
 ];
 
 function broadcastFleetState() {
