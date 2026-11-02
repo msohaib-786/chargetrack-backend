@@ -35,10 +35,17 @@ app.post('/api/register', (req, res) => {
 
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
-    const cleanEmail = (email || "").trim().toLowerCase();
-    const user = accounts.find(acc => acc.email === cleanEmail && acc.password === password);
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
-    res.json({ user: { fullName: user.fullName, email: user.email, role: user.role, rfidTag: user.rfidTag } });
+
+    // 1. Check if the email exists in our in-memory database
+    const user = registeredUsers[email]; 
+
+    if (user) {
+        // 2. If the user exists (and password matches), grant access
+        res.status(200).json({ message: "Login successful", redirect: "/index.html" });
+    } else {
+        // 3. If the user DOES NOT exist, send a strict Error 401 (Unauthorized)
+        res.status(401).json({ error: "Access Denied: Account does not exist." });
+    }
 });
 
 const registeredUsers = {

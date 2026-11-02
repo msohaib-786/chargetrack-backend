@@ -325,22 +325,39 @@
     }
 
     // Authentication Handlers
-    function handleLogin(e) {
-      e.preventDefault();
-      const role = document.getElementById('selectedRole').value;
-      const email = document.getElementById('loginEmail').value;
-      
-      showToast(`Authenticating ${email}...`, true);
-      
-      setTimeout(() => {
-        if (role === 'admin') {
-          window.location.href = 'index.html';
-        } else {
-          window.location.href = 'driver.html';
-        }
-      }, 800);
-    }
+function handleLogin(e) {
+    e.preventDefault();
+    
+    // I am assuming your code ends with .value where it got cut off in the picture
+    const role = document.getElementById('selectedRole').value; 
+    const email = document.getElementById('loginEmail').value; 
+    
+    // 1. Define your secure "In-Memory" list of allowed emails
+    const allowedEmails = [
+        "admin@chargetrack.co.za",
+        "lecturer@richfield.ac.za",
+        "sohaib@chargetrack.co.za"
+    ];
 
+    showToast(`Authenticating ${email}...`, true); // Keeps your cool loading animation
+
+    setTimeout(() => {
+        // 2. THE FIX: Check if the typed email actually exists in our list
+        if (allowedEmails.includes(email.toLowerCase())) {
+            
+            // Access Granted! Now check which dashboard to send them to
+            if (role === 'admin') {
+                window.location.href = 'index.html';
+            } else {
+                window.location.href = 'driver.html';
+            }
+
+        } else {
+            // Access Denied! Block the redirect and show an error
+            alert("Access Denied: This email is not registered in the database.");
+        }
+    }, 800);
+}
     function handleRegister(e) {
       e.preventDefault();
       showToast('Account created successfully! Please sign in.', true);
