@@ -324,20 +324,38 @@
       setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
 
-    // Authentication Handlers
+   // Authentication Handlers
 function handleLogin(e) {
     e.preventDefault();
     
-    // I am assuming your code ends with .value where it got cut off in the picture
     const role = document.getElementById('selectedRole').value; 
     const email = document.getElementById('loginEmail').value; 
     
-    // 1. Define your secure "In-Memory" list of allowed emails
-    const allowedEmails = [
+    // 1. THE NEW FIX: Pull the list of allowed emails from the browser's memory
+    // If it's empty, it defaults to your core admin emails.
+    let allowedEmails = JSON.parse(localStorage.getItem('chargetrack_users')) || [
         "admin@chargetrack.co.za",
         "lecturer@richfield.ac.za",
         "sohaib@chargetrack.co.za"
     ];
+
+    showToast(`Authenticating ${email}...`, true); 
+
+    setTimeout(() => {
+        // 2. Check if the typed email exists in the dynamic Local Storage list
+        if (allowedEmails.includes(email.toLowerCase())) {
+            
+            if (role === 'admin') {
+                window.location.href = 'index.html';
+            } else {
+                window.location.href = 'driver.html';
+            }
+
+        } else {
+            alert("Access Denied: This email is not registered in the database.");
+        }
+    }, 800);
+}
 
     showToast(`Authenticating ${email}...`, true); // Keeps your cool loading animation
 
@@ -357,12 +375,35 @@ function handleLogin(e) {
             alert("Access Denied: This email is not registered in the database.");
         }
     }, 800);
-}
-    function handleRegister(e) {
-      e.preventDefault();
-      showToast('Account created successfully! Please sign in.', true);
-      setTimeout(() => switchTab('login'), 1500);
+}function handleRegister(e) {
+    e.preventDefault();
+
+    // 1. Grab the email the user just typed into the registration form
+    // (IMPORTANT: Make sure your HTML input for this has id="registerEmail")
+    const newEmailInput = document.getElementById('registerEmail');
+    const newEmail = newEmailInput ? newEmailInput.value.toLowerCase() : "";
+
+    if (newEmail) {
+        // 2. Get the current list of users from memory
+        let currentUsers = JSON.parse(localStorage.getItem('chargetrack_users')) || [
+            "admin@chargetrack.co.za",
+            "lecturer@richfield.ac.za",
+            "sohaib@chargetrack.co.za"
+        ];
+
+        // 3. Add the newly registered email to the list
+        if (!currentUsers.includes(newEmail)) {
+            currentUsers.push(newEmail);
+        }
+
+        // 4. Save the updated list back into Local Storage
+        localStorage.setItem('chargetrack_users', JSON.stringify(currentUsers));
     }
+
+    // 5. Your original animations
+    showToast('Account created successfully! Please sign in', true);
+    setTimeout(() => switchTab('login'), 1500);
+}
 
     // --- 2-STEP OTP PASSWORD RESET LOGIC ---
     let generatedOtp = "";
